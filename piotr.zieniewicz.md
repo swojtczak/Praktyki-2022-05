@@ -1,1 +1,0 @@
-sprzedam opla
