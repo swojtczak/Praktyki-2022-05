@@ -62,27 +62,40 @@ void wipe(short mode){
     short wiperState = 0;
     if(mode == 2){
         int count = 0;
+        int sprinklersCount = 0;
         for(;;){
-            if(count == 6) break;
+            if(count == 5) break;
             std::cout<< u8"\033[2J\033[1;1H";
-            for(short sprinklers = 0; sprinklers <= count; sprinklers++){
-                if(sprinklers == 0) std::cout << "     T";
-                else std::cout << "     |\n";
+    
+            for(short spacing = 3 - sprinklersCount; spacing >= 0; spacing--) std::cout << "\n";
+            std::cout << "        T               T\n";
+
+            if(sprinklersCount > 0){
+                for(short sprinklers = 0; sprinklers < sprinklersCount; sprinklers++){
+                    std::cout << "        |               |\n";
+                }
             }
-            drawWipers(0, true);
+
             count++;
-            usleep(250000);
+            sprinklersCount++;
+
+            drawWipers(0, true);
+            std::cout.flush();
+            usleep(125000);
         }
+        usleep(500000);
     }
     for(;;){
         std::cout<< u8"\033[2J\033[1;1H";
         drawWipers(wiperState, false);
         wiperState++;
+        std::cout.flush();
         usleep(500000);
         if(wiperState > 4){
             for(short backwardRun = 3; backwardRun > 0; backwardRun--){
                 std::cout<< u8"\033[2J\033[1;1H";
                 drawWipers(backwardRun, false);
+                std::cout.flush();
                 usleep(500000);
             }
             wiperState = 0;
