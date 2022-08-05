@@ -1,0 +1,3 @@
+/home/autox/praktyki/Praktyki-2022-05/src/direction_indicators_control_app/build/CMakeFiles/rebuild_cache.dir
+/home/autox/praktyki/Praktyki-2022-05/src/direction_indicators_control_app/build/CMakeFiles/edit_cache.dir
+/home/autox/praktyki/Praktyki-2022-05/src/direction_indicators_control_app/build/CMakeFiles/DirectionIndicatorControll.dir
