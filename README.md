@@ -3,11 +3,15 @@
 ## Build instructions
 
 ### Linux:
+
+```
 mkdir build
 cd build
 cmake ..
 cmake .
 cmake --build .
+```
 
 ### Windows:
+
 Good luck :)
