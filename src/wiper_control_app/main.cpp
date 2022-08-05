@@ -92,14 +92,14 @@ void wipe(short mode){
         std::cout.flush();
         usleep(500000);
         if(wiperState > 4){
-            for(short backwardRun = 3; backwardRun > 0; backwardRun--){
+            for(short backwardRun = 3; backwardRun >= 0; backwardRun--){
                 std::cout<< u8"\033[2J\033[1;1H";
                 drawWipers(backwardRun, false);
                 std::cout.flush();
                 usleep(500000);
             }
             wiperState = 0;
-            if(mode == 1 || stopWiping) return;
+            if(mode == 1 || mode == 2 || stopWiping) return;
         } 
     }
 }
@@ -109,7 +109,10 @@ int main(){
     bool turnedOn = false;
 
     for(;;){
-        if(!turnedOn) drawWipers(0, false);
+        if(!turnedOn){
+            std::cout<< u8"\033[2J\033[1;1H";
+            drawWipers(0, false);
+        } 
         if(turnedOn){
             system("clear");
             switch(mode){
