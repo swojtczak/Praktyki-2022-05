@@ -2,7 +2,6 @@
 #include <string>
 #include <array>
 #include <unistd.h>
-#include <ncurses.h>
 
 std::array<int, 4> szyby = {0,0,0,0};
 
