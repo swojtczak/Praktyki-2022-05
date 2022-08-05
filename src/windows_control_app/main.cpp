@@ -6,12 +6,10 @@
 std::array<int, 4> szyby = {0,0,0,0};
 
 void drawWindows(){
-    std::array<int, 4> temp;
     std::cout<< u8"\033[2J\033[1;1H";
-    temp = szyby;
     for(int i = 0; i < 10; i++){
         for(int x = 0; x < 4; x++){
-            if((i-temp[x]) > 0){
+            if((i-szyby[x]) > 0){
                 std::cout << "  |||||  ";
             }else{
                 std::cout << "         ";
@@ -22,7 +20,6 @@ void drawWindows(){
 }
 
 int main(){
-    int counter = 0;
     bool isMoving = false;
     int moved = 0;
     int val = 1;
