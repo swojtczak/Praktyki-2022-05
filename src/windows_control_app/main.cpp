@@ -20,7 +20,6 @@ void drawWindows(){
 }
 
 int main(){
-    int counter = 0;
     bool isMoving = false;
     int moved = 0;
     int val = 1;
