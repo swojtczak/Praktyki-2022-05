@@ -48,7 +48,7 @@ std::array<int, 4> szybyFuture = {0,0,0,0};
 
 const std::string SERVER_ADDRESS("tcp://localhost:1883");
 const std::string CLIENT_ID("paho_cpp_async_subcribe");
-const std::string TOPIC("window/");
+const std::string TOPIC("/car/window/");
 
 const int	QOS = 1;
 const int	N_RETRY_ATTEMPTS = 5;
@@ -116,7 +116,6 @@ class callback : public virtual mqtt::callback, public virtual mqtt::iaction_lis
 	void reconnect() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 		try {
-            std::cout << "dupa";
 			cli_.connect(connOpts_, nullptr, *this);
 		}
 		catch (const mqtt::exception& exc) {
@@ -142,8 +141,8 @@ class callback : public virtual mqtt::callback, public virtual mqtt::iaction_lis
 
 	// (Re)connection success
 	void connected(const std::string& cause) override {
-		std::cout << "\nConnection success" << std::endl;
-		std::cout << "\nSubscribing to topic '" << TOPIC << "'\n" << "\tfor client " << CLIENT_ID << " using QoS" << QOS << "\n" << "\nPress Q<Enter> to quit\n" << std::endl;
+		//std::cout << "\nConnection success" << std::endl;
+		//std::cout << "\nSubscribing to topic '" << TOPIC << "'\n" << "\tfor client " << CLIENT_ID << " using QoS" << QOS << "\n" << "\nPress Q<Enter> to quit\n" << std::endl;
         
         for(int i = 0; i < 4; i++){
             cli_.subscribe((TOPIC + std::to_string(i)), QOS, nullptr, subListener_);
@@ -166,10 +165,16 @@ class callback : public virtual mqtt::callback, public virtual mqtt::iaction_lis
 	// Callback for when a message arrives.
 	void message_arrived(mqtt::const_message_ptr msg) override {
         int temp = std::string(msg->get_topic())[7] - 48;
-        int val = values[std::string(msg->to_string())];
-        szybyFuture[temp] = val;
-		std::cout << "Message arrived " << msg->to_string() << std::endl;
-		std::cout << "\ttopic: '" << moved << "'" << std::endl;
+        int valTemp = szybyFuture[temp];
+        try{
+            valTemp = values.at(std::string(msg->to_string()));
+        }catch(const std::out_of_range& oor){
+
+        }
+        
+        szybyFuture[temp] = valTemp;
+        //std::cout << "Message arrived: " << msg->to_string() << std::endl;
+		//std::cout << "\ttopic: '" << msg->get_topic() << "'" << std::endl;
 	}
 
 	void delivery_complete(mqtt::delivery_token_ptr token) override {}
@@ -183,9 +188,9 @@ void drawWindows(){
    for(int i = 0; i < 10; i++){
         for(int x = 0; x < 4; x++){
             if((i-szyby[x]) >= 0){
-                std::cout << "  |||||  ";
+                std::cout << "  |||||  " << szybyFuture[x];
             }else{
-                std::cout << "         ";
+                std::cout << "         " << szybyFuture[x];
             }
         }
         std::cout << "\n";
