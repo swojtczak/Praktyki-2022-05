@@ -13,6 +13,15 @@ int moved = 0;
 int val;
 int windowState;
 
+std::map<std::string, int> values =
+{
+    {"down", -1},
+    {"stop", 0},
+    {"up", 1}
+};
+
+std::array<int, 4> szyby = {0,0,0,0};
+std::array<int, 4> szybyFuture = {0,0,0,0};
 /*
 
               .-=====-.
@@ -44,8 +53,6 @@ const std::string TOPIC("window/");
 const int	QOS = 1;
 const int	N_RETRY_ATTEMPTS = 5;
 
-/////////////////////////////////////////////////////////////////////////////
-
 // Callbacks for the success or failures of requested actions.
 // This could be used to initiate further action, but here we just log the
 // results to the console.
@@ -57,17 +64,17 @@ class action_listener : public virtual mqtt::iaction_listener
 	void on_failure(const mqtt::token& tok) override {
 		
         if (tok.get_message_id() != 0){
-			//std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
+			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
         }
 
-        //std::cout << std::endl;
+        std::cout << std::endl;
 	}
 
 	void on_success(const mqtt::token& tok) override {
 		std::cout << name_ << " success";
 		
         if (tok.get_message_id() != 0){
-			//std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
+			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
         }
 		
         auto top = tok.get_topics();
@@ -82,8 +89,6 @@ class action_listener : public virtual mqtt::iaction_listener
 public:
 	action_listener(const std::string& name) : name_(name) {}
 };
-
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * Local callback & listener class for use with the client connection.
@@ -111,6 +116,7 @@ class callback : public virtual mqtt::callback, public virtual mqtt::iaction_lis
 	void reconnect() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 		try {
+            std::cout << "dupa";
 			cli_.connect(connOpts_, nullptr, *this);
 		}
 		catch (const mqtt::exception& exc) {
@@ -160,9 +166,10 @@ class callback : public virtual mqtt::callback, public virtual mqtt::iaction_lis
 	// Callback for when a message arrives.
 	void message_arrived(mqtt::const_message_ptr msg) override {
         int temp = std::string(msg->get_topic())[7] - 48;
-        szybyFuture[temp] = std::stoi(msg->to_string());
-		//std::cout << "Message arrived " << stoi(msg->to_string()) << std::endl;
-		//std::cout << "\ttopic: '" << moved << "'" << std::endl;
+        int val = values[std::string(msg->to_string())];
+        szybyFuture[temp] = val;
+		std::cout << "Message arrived " << msg->to_string() << std::endl;
+		std::cout << "\ttopic: '" << moved << "'" << std::endl;
 	}
 
 	void delivery_complete(mqtt::delivery_token_ptr token) override {}
@@ -171,22 +178,20 @@ public:
 	callback(mqtt::async_client& cli, mqtt::connect_options& connOpts) : nretry_(0), cli_(cli), connOpts_(connOpts), subListener_("Subscription") {}
 };
 
-std::array<int, 4> szyby = {0,0,0,0};
-std::array<int, 4> szybyFuture = {0,0,0,0};
-
 void drawWindows(){
     std::cout<< u8"\033[2J\033[1;1H";
-    for(int i = 0; i < 10; i++){
+   for(int i = 0; i < 10; i++){
         for(int x = 0; x < 4; x++){
-            if((i-szyby[x]) > 0){
-                std::cout << "  |||||  ";
+            if((i-szyby[x]) >= 0){
+                std::cout << "  ||||| " << szybyFuture[x];
             }else{
-                std::cout << "         ";
+                std::cout << "        " << szybyFuture[x];
             }
         }
         std::cout << "\n";
     }
 }
+
 int main(int argc, char* argv[])
 {
 	// A subscriber often wants the server to remember its messages when its
@@ -206,7 +211,7 @@ int main(int argc, char* argv[])
 	// When completed, the callback will subscribe to topic.
 
 	try {
-		//std::cout << "Connecting to the MQTT server...\n" << std::flush;
+		std::cout << "Connecting to the MQTT server...\n" << std::flush;
 		cli.connect(connOpts, nullptr, cb);
 	}
 	catch (const mqtt::exception& exc) {
@@ -216,18 +221,19 @@ int main(int argc, char* argv[])
 
 	while(true){
         drawWindows();
+        std::cout.flush();
         sleep(1);
-            while(val != 0){
-                windowState = szyby[moved];
-                szyby[moved] = szyby[moved] - (val / abs(val));
-                if(szyby[moved] > 9 || szyby[moved] < 0){
-                    szyby[moved] = windowState;
-                    val = 0;
+        for(int x = 0; x < 4; x++){
+            val = szybyFuture[x];
+            windowState = szyby[x];
+            if(val != 0){
+                szyby[x] = szyby[x] - (szybyFuture[x] / abs(szybyFuture[x]));
+                if(szyby[x] > 9 || szyby[x] < 0){
+                    szyby[x] = windowState;
+                    szybyFuture[x] = 0;
                 }
-                drawWindows();
-                std::cout.flush();
-                sleep(1);
             }
+        }
     }
 
 	// Disconnect
@@ -238,7 +244,7 @@ int main(int argc, char* argv[])
 		std::cout << "OK" << std::endl;
 	}
 	catch (const mqtt::exception& exc) {
-		std::cerr << exc << std::endl;
+		std::cerr << "D U P A" << exc << std::endl;
 		return 1;
 	}
 
