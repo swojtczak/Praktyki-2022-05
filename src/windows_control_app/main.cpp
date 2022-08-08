@@ -64,26 +64,26 @@ class action_listener : public virtual mqtt::iaction_listener
 	void on_failure(const mqtt::token& tok) override {
 		
         if (tok.get_message_id() != 0){
-			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
+			//std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
         }
 
-        std::cout << std::endl;
+        //std::cout << std::endl;
 	}
 
 	void on_success(const mqtt::token& tok) override {
-		std::cout << name_ << " success";
+		//std::cout << name_ << " success";
 		
         if (tok.get_message_id() != 0){
-			std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
+			//std::cout << " for token: [" << tok.get_message_id() << "]" << std::endl;
         }
 		
         auto top = tok.get_topics();
 		
         if (top && !top->empty()){
-			std::cout << "\ttoken topic: '" << (*top)[0] << "', ..." << std::endl;
+			//std::cout << "\ttoken topic: '" << (*top)[0] << "', ..." << std::endl;
         }
 
-		std::cout << std::endl;
+		//std::cout << std::endl;
 	}
 
 public:
@@ -188,9 +188,9 @@ void drawWindows(){
    for(int i = 0; i < 10; i++){
         for(int x = 0; x < 4; x++){
             if((i-szyby[x]) >= 0){
-                std::cout << "  |||||  " << szybyFuture[x];
+                std::cout << "  |||||  ";
             }else{
-                std::cout << "         " << szybyFuture[x];
+                std::cout << "         ";
             }
         }
         std::cout << "\n";
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 	// When completed, the callback will subscribe to topic.
 
 	try {
-		std::cout << "Connecting to the MQTT server...\n" << std::flush;
+		//std::cout << "Connecting to the MQTT server...\n" << std::flush;
 		cli.connect(connOpts, nullptr, cb);
 	}
 	catch (const mqtt::exception& exc) {
