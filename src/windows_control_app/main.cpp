@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	while(true){
+	while(!false){
         drawWindows();
         std::cout.flush();
         sleep(1);
