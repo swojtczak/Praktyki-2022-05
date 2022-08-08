@@ -183,9 +183,9 @@ void drawWindows(){
    for(int i = 0; i < 10; i++){
         for(int x = 0; x < 4; x++){
             if((i-szyby[x]) >= 0){
-                std::cout << "  ||||| " << szybyFuture[x];
+                std::cout << "  |||||  ";
             }else{
-                std::cout << "        " << szybyFuture[x];
+                std::cout << "         ";
             }
         }
         std::cout << "\n";
