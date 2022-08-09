@@ -164,7 +164,7 @@ class callback : public virtual mqtt::callback, public virtual mqtt::iaction_lis
 
 	// Callback for when a message arrives.
 	void message_arrived(mqtt::const_message_ptr msg) override {
-        int temp = std::string(msg->get_topic())[7] - 48;
+        int temp = std::string(msg->get_topic())[12] - 48;
         int valTemp = szybyFuture[temp];
         try{
             valTemp = values.at(std::string(msg->to_string()));
@@ -187,7 +187,7 @@ void drawWindows(){
     std::cout<< u8"\033[2J\033[1;1H";
    for(int i = 0; i < 10; i++){
         for(int x = 0; x < 4; x++){
-            if((i-szyby[x]) >= 0){
+            if((i-szyby[x]) > 0){
                 std::cout << "  |||||  ";
             }else{
                 std::cout << "         ";
