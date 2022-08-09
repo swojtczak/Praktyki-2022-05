@@ -5,7 +5,7 @@ const std::string ADDRESS {"tcp://localhost:1883"};
 const int QOS = 1;
 
 int main(int argc, char* argv[]){
-    std::string TOPIC { "window/" + std::string(argv[1]) };
+    std::string TOPIC { "/car/window/" + std::string(argv[1]) };
     char* PAYLOAD2 = argv[2];
 
     // Create a client

@@ -11,3 +11,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build/*
+src/windows_control_app/build/WindowsControll
+.gitignore
+src/example/build/data_publish_example
