@@ -1,4 +1,7 @@
-"# Praktyki-2022-05" 
+# Praktyki-2022-05 
+
+[Report a :bug:]https://github.com/swojtczak/Praktyki-2022-05/pulls)
+
 
 ## Build instructions
 
@@ -14,4 +17,4 @@ cmake --build .
 
 ### Windows:
 
-Good luck :)
+Good luck :skull:
