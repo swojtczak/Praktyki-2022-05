@@ -104,7 +104,7 @@ void drawIndicators(bool state)
             }
             else
             {
-                std::cout << indicators_array[state ? (1 << 1) + indicators.right : 2][i][j - 11];
+                std::cout << indicators_array[state ? 2 + indicators.right : 2][i][j - 11];
             }
         }
         std::cout << "\n";
@@ -129,14 +129,13 @@ int main()
 		auto tok = cli.connect(connOpts);
 		auto rsp = tok->get_connect_response();
 
-		// If there is no session present, then we need to subscribe, but if
-		// there is a session, then the server remembers us and our
-		// subscriptions.
 		if (!rsp.is_session_present())
-			cli.subscribe(TOPIC + "right", QOS)->wait();
+        {
+            cli.subscribe(TOPIC + "right", QOS)->wait();
             cli.subscribe(TOPIC + "left", QOS)->wait();
             cli.subscribe(TOPIC + "hazard", QOS)->wait();
-
+        }
+		
 		std::cout << "Connected and redy to run" << std::endl;
 
         bool state = false;
@@ -173,9 +172,11 @@ int main()
 			std::cout << "\nClient was disconnected" << std::endl;
 		}
 	}
-	catch (const mqtt::exception& exc) {
+	catch (const mqtt::exception& exc) 
+    {
 		std::cerr << "\n  " << exc << std::endl;
 		return 1;
 	}
+
     return 0;
 }
