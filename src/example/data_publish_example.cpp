@@ -4,12 +4,9 @@
 const std::string ADDRESS {"tcp://localhost:1883"};
 const int QOS = 1;
 
-int main(int argc, char* argv[])
-{
-    const std::string TOPIC { "hello" };
-    const std::string PAYLOAD1 { "Hello World!" };
-
-    const char* PAYLOAD2 = "Hi there!";
+int main(int argc, char* argv[]){
+    std::string TOPIC { "/car/window/" + std::string(argv[1]) };
+    char* PAYLOAD2 = argv[2];
 
     // Create a client
 
@@ -25,10 +22,10 @@ int main(int argc, char* argv[])
 
         // Publish using a message pointer.
 
-        auto msg = mqtt::make_message(TOPIC, PAYLOAD1);
-        msg->set_qos(QOS);
+        std::cout << TOPIC << " " << PAYLOAD2 << std::endl;
+        //msg->set_qos(QOS);
 
-        cli.publish(msg);
+        //cli.publish(msg);
 
         // Now try with itemized publish.
 
@@ -39,8 +36,7 @@ int main(int argc, char* argv[])
         cli.disconnect();
     }
     catch (const mqtt::exception& exc) {
-        std::cerr << "Error: " << exc.what() << " ["
-            << exc.get_reason_code() << "]" << std::endl;
+        std::cerr << "Error: " << exc.what() << " [" << exc.get_reason_code() << "]" << std::endl;
         return 1;
     }
 
