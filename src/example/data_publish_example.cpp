@@ -10,7 +10,7 @@ int main(int argc, char* argv[]){
 
     // Create a client
 
-    mqtt::client cli(ADDRESS, "");
+    mqtt::client cli(ADDRESS, "data_publish_example");
     mqtt::connect_options connOpts;
     connOpts.set_keep_alive_interval(20);
     connOpts.set_clean_session(true);
