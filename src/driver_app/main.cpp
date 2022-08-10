@@ -1,7 +1,9 @@
 #include <iostream>
+#include "prompt.h"
 
 int main()
 {
-    std::cout << "Hello World\n";
+    repl_loop();
+
     return 0;
 }
