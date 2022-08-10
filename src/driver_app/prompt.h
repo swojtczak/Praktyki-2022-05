@@ -6,8 +6,15 @@
 Commands:\n\
 exit \t\t-> exit this prompt\n\
 help \t\t-> write this help message\n\
-test \t\t-> write test123\n\
-mykmyk \t\t-> write 123mykmyk"
+open <front-left, etc> window \t\t-> open the specified window\n\
+close <front-left, etc> window \t\t-> close the specified window\n\
+turn_on <left or right> indicator \t\t-> turn on the specified indicator light\n\
+turn_off <left or right> indicator \t\t-> turn off the specified indicator\n\
+wipe <front or back> <on or once> \t\t-> turn on the specified wipers in single or continous mode\n\
+wipe_w_fluid <front or back> <on or once> \t\t-> turn on the specified wipers and sprinklers in single or continous mode\n\
+wipe_off <front or back> \t\t-> turn off the specified wipers\n\
+"
+
 
 struct command {
     std::string command;
