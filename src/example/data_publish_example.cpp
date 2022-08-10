@@ -29,7 +29,6 @@ int main(int argc, char* argv[]){
 
         // Now try with itemized publish.
 
-        cli.publish(TOPIC, PAYLOAD2, strlen(PAYLOAD2), 0, false);
 
         // Disconnect
 
