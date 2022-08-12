@@ -8,6 +8,7 @@ exit \t\t-> exit this prompt\n\
 help \t\t-> write this help message\n\
 open <front-left, etc> window \t\t-> open the specified window\n\
 close <front-left, etc> window \t\t-> close the specified window\n\
+stop <front-left, etc> window \t\t-> stop the specified window's movement\n\
 turn_on <left or right> indicator \t\t-> turn on the specified indicator light\n\
 turn_off <left or right> indicator \t\t-> turn off the specified indicator\n\
 wipe <front or back> <on or once> \t\t-> turn on the specified wipers in single or continous mode\n\
@@ -31,10 +32,11 @@ const struct command command_list[] = {
     {"wipe",        3},
     {"wipe_w_fluid", 3},
     {"wipe_off",    2},
+    {"stop",        3},
 };
 
 
 void repl_loop();
 int check_operator(std::string op);
-std::vector<std::string> split_line(std::string line);
+std::vector<std::string> split_line(char *line);
 bool execute_instruction(int instruction, std::vector<std::string> args);
