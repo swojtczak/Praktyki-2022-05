@@ -5,6 +5,11 @@
 #include <map>
 #include <array>
 #include <fstream>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+std::string homeDir;
 
 int moved = 0;
 int val;
@@ -26,9 +31,12 @@ const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
 const std::string TOPIC 			{ "/car/window/" };
 
 void writeOnfile (std::string text) {
+    std::string path = homeDir + "/.local/share/autox.log";
     char* filetext = &text[0];
     std::ofstream myfile;
-    myfile.open ("/var/log/autox.log", std::fstream::app);
+    //myfile.open ("/var/log/autox.log", std::fstream::app);
+    myfile.open (path, std::fstream::app);
+    
     myfile << filetext;
     myfile.close();
 }
@@ -63,15 +71,25 @@ void drawWindows(){
     }
 }
 
+void my_handler(int s){
+    writeOnfile("Application terminated by user.\n");
+    exit(1);
+}
+
 int main(){
+    homeDir = getenv("HOME"); 
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	auto connOpts = mqtt::connect_options_builder().clean_session(false).finalize();
 
+            struct sigaction sigIntHandler;
+            sigIntHandler.sa_handler = my_handler;
+            sigemptyset(&sigIntHandler.sa_mask);
+            sigIntHandler.sa_flags = 0;
+            sigaction(SIGINT, &sigIntHandler, NULL);
     try{
 		cli.start_consuming();
 
-		std::cout << "Connecting to the MQTT server..." << std::flush;
 		auto tok = cli.connect(connOpts);
 		auto rsp = tok->get_connect_response();
 
@@ -79,6 +97,7 @@ int main(){
             cli.subscribe(TOPIC + std::to_string(i), QOS)->wait();
         }
 
+        writeOnfile("Windows control app connected\n");
 
         while(!false){
             mqtt::const_message_ptr msg;
@@ -117,6 +136,7 @@ int main(){
         }
     }catch (const mqtt::exception& exc) {
         std::cerr << "\n  " << exc << std::endl;
+        writeOnfile("Windows control app crashed unexpectedly. \n");
         return 1;
     }
     return 0;
