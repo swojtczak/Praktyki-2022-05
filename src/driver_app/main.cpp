@@ -1,9 +1,14 @@
+#include <cstring>
 #include <iostream>
 #include "prompt.h"
 
-int main()
+bool debug = false;
+
+int main(int argc, char **argv)
 {
-    repl_loop();
+    if (argc >= 2 && !strcmp(argv[1], "--debug"))
+        debug = true;
+    repl_loop(debug);
 
     return 0;
 }
