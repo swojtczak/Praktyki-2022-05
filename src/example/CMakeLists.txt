@@ -1,3 +1,5 @@
+project(data_publish_example)
+cmake_minimum_required(VERSION 3.18)
 find_package(PahoMqttCpp REQUIRED)
 
 add_executable(data_publish_example data_publish_example.cpp)
