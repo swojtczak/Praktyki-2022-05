@@ -5,11 +5,10 @@
 #include <map>
 #include <array>
 #include <fstream>
-#include <stdlib.h>
 #include <signal.h>
-#include <unistd.h>
-
-std::string homeDir;
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 int moved = 0;
 int val;
@@ -30,11 +29,21 @@ const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
 const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
 const std::string TOPIC 			{ "/car/window/" };
 
+std::string homeDir;
+
 void writeOnfile (std::string text) {
     std::string path = homeDir + "/.local/share/autox.log";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
+    auto str = oss.str();
+
+    text = "[" + str + "] [windows_control_app:" + CLIENT_ID + "] " + text;
+
     char* filetext = &text[0];
     std::ofstream myfile;
-    //myfile.open ("/var/log/autox.log", std::fstream::app);
     myfile.open (path, std::fstream::app);
     
     myfile << filetext;
@@ -46,7 +55,7 @@ void msgHandling(mqtt::const_message_ptr msg){
     int temp = topic[12] - 48;
     int valTemp = szybyFuture[temp];
     std::string content = std::string(msg->to_string());
-    std::string text = "Windows control app received message: \"" + content + "\" on topic: " + msg->get_topic() + "\n";
+    std::string text = "received message: \"" + content + "\" on topic: " + msg->get_topic() + "\n";
     writeOnfile(text);
 
     try{
@@ -72,21 +81,22 @@ void drawWindows(){
 }
 
 void my_handler(int s){
-    writeOnfile("Application terminated by user.\n");
+    writeOnfile("terminated by user.\n");
     exit(1);
 }
 
 int main(){
-    homeDir = getenv("HOME"); 
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	auto connOpts = mqtt::connect_options_builder().clean_session(false).finalize();
 
-            struct sigaction sigIntHandler;
-            sigIntHandler.sa_handler = my_handler;
-            sigemptyset(&sigIntHandler.sa_mask);
-            sigIntHandler.sa_flags = 0;
-            sigaction(SIGINT, &sigIntHandler, NULL);
+    homeDir = getenv("HOME"); 
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
     try{
 		cli.start_consuming();
 
@@ -97,7 +107,7 @@ int main(){
             cli.subscribe(TOPIC + std::to_string(i), QOS)->wait();
         }
 
-        writeOnfile("Windows control app connected\n");
+        writeOnfile("connected\n");
 
         while(!false){
             mqtt::const_message_ptr msg;
@@ -131,12 +141,13 @@ int main(){
             cli.stop_consuming();
             cli.disconnect()->wait();
             std::cout << "OK" << std::endl;
+            writeOnfile("disconnected from the server.\n");
         }else{
             std::cout << "\nClient was disconnected" << std::endl;
         }
     }catch (const mqtt::exception& exc) {
         std::cerr << "\n  " << exc << std::endl;
-        writeOnfile("Windows control app crashed unexpectedly. \n");
+        writeOnfile("crashed unexpectedly.\n");
         return 1;
     }
     return 0;

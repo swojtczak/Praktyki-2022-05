@@ -7,27 +7,70 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "prompt.h"
+#include <fstream>
+#include <signal.h>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
+std::string homeDir;
 const std::string ADDRESS {"tcp://localhost:1883"};
+const std::string CLIENT_ID {"driver_app"};
 const int QOS = 1;
 mqtt::connect_options connOpts;
-mqtt::client cli(ADDRESS, "driver_app");
+mqtt::client cli(ADDRESS, CLIENT_ID);
+
+void writeOnfile (std::string text) {
+    std::string path = homeDir + "/.local/share/autox.log";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
+    auto str = oss.str();
+
+    text = "[" + str + "] [driver_app:" + CLIENT_ID + "] " + text;
+
+    char* filetext = &text[0];
+    std::ofstream myfile;
+    myfile.open (path, std::fstream::app);
+    
+    myfile << filetext;
+    myfile.close();
+}
 
 void sendMessage(std::string top, std::string data){
     char* payload =  &data[0];
+    
 
     try {
         cli.connect(connOpts);
         cli.publish(top, payload, strlen(payload), 0, false);
+        std::string text = "sent message: \"" + data + "\" on topic: " + top + "\n";
+        writeOnfile(text);
         cli.disconnect();
     }catch (const mqtt::exception& exc) {
         std::cerr << "Error: " << exc.what() << " [" << exc.get_reason_code() << "]" << std::endl;
+        std::string text = "sending message: \"" + data + "\" on topic: " + top + "failed.\n";
+        writeOnfile(text);
     }
 
 }
 
+void my_handler(int s){
+    writeOnfile("terminated by user.\n");
+    exit(1);
+}
+
 void repl_loop()
 {
+    homeDir = getenv("HOME"); 
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
     connOpts.set_keep_alive_interval(20);
     connOpts.set_clean_session(true);
 
@@ -36,6 +79,8 @@ void repl_loop()
     char *line;
     std::string op;
     std::vector<std::string> args;
+
+    writeOnfile("Started\n");
 
     do {
         // std::cout << PROMPT;
@@ -122,6 +167,7 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             return true;
 
         case 0:
+            writeOnfile("user left using the exit command\n");
             exit(0);
 
         case 1:

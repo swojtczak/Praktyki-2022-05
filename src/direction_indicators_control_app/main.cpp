@@ -3,6 +3,11 @@
 #include <unistd.h>
 #include "mqtt/client.h"
 #include <map>
+#include <fstream>
+#include <signal.h>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 //temporary cli painting arrays
 char indicators_array[4][3][8]  {{{'/', '-', '-', '-', '-', '-', '-', '|'},
@@ -17,6 +22,8 @@ char indicators_array[4][3][8]  {{{'/', '-', '-', '-', '-', '-', '-', '|'},
                                 {{'|', '-', '-', '-', '-', '-', '-', '\\'},
                                  {'|', ' ', '#', '#', '#', '#', ' ', '|'},
                                  {'|', '-', '-', '-', '-', '-', '-', '|'}}};
+
+std::string homeDir;
 
 const int  QOS = 1;
 
@@ -64,8 +71,35 @@ struct Indicators
     }
 }indicators;
 
+void writeOnfile (std::string text) {
+    std::string path = homeDir + "/.local/share/autox.log";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
+    auto str = oss.str();
+
+    text = "[" + str + "] [direction_indicators_control_app:" + CLIENT_ID + "] " + text;
+
+    char* filetext = &text[0];
+    std::ofstream myfile;
+    myfile.open (path, std::fstream::app);
+    
+    myfile << filetext;
+    myfile.close();
+}
+
+void my_handler(int s){
+    writeOnfile("terminated by user.\n");
+    exit(1);
+}
+
 void selectAction(std::string topic, std::string payload)
 {
+    std::string text = "received message: \"" + payload + "\" on topic: " + topic + "\n";
+    writeOnfile(text);
+
     std::string direction = topic.erase(0, 15);
     std::map<std::string, int> const topic_cast = { {"left", 0}, {"right", 1}, {"hazard", 2}};
     std::map<std::string, bool> const payload_cast = { {"off", false}, {"on", true}};
@@ -115,6 +149,13 @@ void drawIndicators(bool state)
 
 int main()
 {
+    homeDir = getenv("HOME"); 
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	auto connOpts = mqtt::connect_options_builder()
@@ -137,6 +178,7 @@ int main()
         }
 		
 		std::cout << "Connected and redy to run" << std::endl;
+        writeOnfile("connected\n");
 
         bool state = false;
 
@@ -147,7 +189,7 @@ int main()
             if (cli.try_consume_message(&msg))
             {
                 if (msg == nullptr) break;
-
+                
                 selectAction(msg->get_topic(), msg->get_payload());
             }
             
@@ -166,6 +208,7 @@ int main()
 			cli.stop_consuming();
 			cli.disconnect()->wait();
 			std::cout << "OK" << std::endl;
+            writeOnfile("disconnected from the server.\n");
 		}
 		else 
         {
@@ -175,6 +218,7 @@ int main()
 	catch (const mqtt::exception& exc) 
     {
 		std::cerr << "\n  " << exc << std::endl;
+        writeOnfile("crashed unexpectedly.\n");
 		return 1;
 	}
 
