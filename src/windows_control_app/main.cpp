@@ -4,6 +4,7 @@
 #include "mqtt/client.h"
 #include <map>
 #include <array>
+#include <fstream>
 
 int moved = 0;
 int val;
@@ -24,16 +25,27 @@ const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
 const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
 const std::string TOPIC 			{ "/car/window/" };
 
+void writeOnfile (std::string text) {
+    char* filetext = &text[0];
+    std::ofstream myfile;
+    myfile.open ("/var/log/autox.log", std::fstream::app);
+    myfile << filetext;
+    myfile.close();
+}
+
 void msgHandling(mqtt::const_message_ptr msg){
-    int temp = std::string(msg->get_topic())[12] - 48;
+    std::string topic = std::string(msg->get_topic());
+    int temp = topic[12] - 48;
     int valTemp = szybyFuture[temp];
+    std::string content = std::string(msg->to_string());
+    std::string text = "Windows control app received message: \"" + content + "\" on topic: " + msg->get_topic() + "\n";
+    writeOnfile(text);
 
     try{
-        valTemp = values.at(std::string(msg->to_string()));
+        valTemp = values.at(content);
     }catch(const std::out_of_range& oor){
 
     }
-
     szybyFuture[temp] = valTemp;
 }
 
@@ -50,7 +62,6 @@ void drawWindows(){
         std::cout << "\n";
     }
 }
-
 
 int main(){
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
@@ -86,12 +97,12 @@ int main(){
                 windowState = szyby[x];
                 if(val != 0){
                     szyby[x] = szyby[x] - (szybyFuture[x] / abs(szybyFuture[x]));
-                if(szyby[x] > 9 || szyby[x] < 0){
-                    szyby[x] = windowState;
-                    szybyFuture[x] = 0;
+                    if(szyby[x] > 9 || szyby[x] < 0){
+                        szyby[x] = windowState;
+                        szybyFuture[x] = 0;
+                    }
                 }
             }
-        }
         }
 
 
