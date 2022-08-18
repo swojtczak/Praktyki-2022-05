@@ -28,7 +28,7 @@ std::string homeDir;
 const int  QOS = 1;
 
 const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string CLIENT_ID		{ "directio_indicators_control_app" };
+const std::string CLIENT_ID		{ "direction_indicators_control_app" };
 const std::string TOPIC 			{ "/car/indicator/" };
 
 struct Indicators 

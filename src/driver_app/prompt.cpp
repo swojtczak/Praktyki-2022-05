@@ -8,7 +8,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include "prompt.h"
 #include <fstream>
 #include <signal.h>
@@ -73,12 +72,15 @@ void sendMessage(std::string top, std::string data)
 }
 
 
+<<<<<<< Updated upstream
 void my_handler(int s){
     writeOnfile("terminated by user.\n");
     exit(1);
 }
 
 
+=======
+>>>>>>> Stashed changes
 void repl_loop(bool debug)
 {
     homeDir = getenv("HOME"); 
