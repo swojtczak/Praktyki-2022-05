@@ -10,19 +10,47 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "prompt.h"
+#include <fstream>
+#include <signal.h>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
+std::string homeDir;
+bool debug_mode = false;
 bool scenario_mode = false,
      debug_mode = false;
 std::ifstream sfile;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
+const std::string CLIENT_ID {"driver_app"};
 const int QOS = 1;
 mqtt::connect_options connOpts;
-mqtt::client cli(ADDRESS, "driver_app");
+mqtt::client cli(ADDRESS, CLIENT_ID);
+
+void writeOnfile (std::string text) {
+    std::string path = homeDir + "/.local/share/autox.log";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
+    auto str = oss.str();
+
+    text = "[" + str + "] [driver_app:" + CLIENT_ID + "] " + text;
+
+    char* filetext = &text[0];
+    std::ofstream myfile;
+    myfile.open (path, std::fstream::app);
+    
+    myfile << filetext;
+    myfile.close();
+}
 
 void sendMessage(std::string top, std::string data)
 {
     char* payload =  &data[0];
+    
 
     if (debug_mode) printf("[DEBUG] Trying to send the message: %s %s...\n", top.c_str(), data.c_str());
 
@@ -31,17 +59,35 @@ void sendMessage(std::string top, std::string data)
         cli.connect(connOpts);
         if (debug_mode) printf("[DEBUG] Connected!\n[DEBUG] Publishing the message...\n");
         cli.publish(top, payload, strlen(payload), 0, false);
+        std::string text = "sent message: \"" + data + "\" on topic: " + top + "\n";
+        writeOnfile(text);
         if (debug_mode) printf("[DEBUG] Publishing successful!\n[DEBUG] Disconnecting from the broker...\n");
         cli.disconnect();
         if (debug_mode) printf("[DEBUG] Disconnected!\n");
     }catch (const mqtt::exception& exc) {
         std::cerr << "Error: " << exc.what() << " [" << exc.get_reason_code() << "]" << std::endl;
+        std::string text = "sending message: \"" + data + "\" on topic: " + top + "failed.\n";
+        writeOnfile(text);
     }
 
 }
 
+
+void my_handler(int s){
+    writeOnfile("terminated by user.\n");
+    exit(1);
+}
+
+
 void repl_loop(bool debug)
 {
+    homeDir = getenv("HOME"); 
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
     connOpts.set_keep_alive_interval(20);
     connOpts.set_clean_session(true);
 
@@ -52,6 +98,8 @@ void repl_loop(bool debug)
     char *line;
     std::string temp;
     std::vector<std::string> args;
+
+    writeOnfile("Started\n");
 
     do {
         if (scenario_mode) {
@@ -147,6 +195,7 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             return true;
 
         case 0:
+            writeOnfile("user left using the exit command\n");
             exit(0);
 
         case 1:
