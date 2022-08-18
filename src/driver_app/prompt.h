@@ -33,6 +33,7 @@ const struct command command_list[] = {
     {"wipe_w_fluid", 3},
     {"wipe_off",    2},
     {"stop",        3},
+    {"delay",       2},
 };
 
 

@@ -6,16 +6,19 @@
 #include "mqtt/client.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <unistd.h>
 #include "prompt.h"
 
-bool debug_mode = false;
+bool scenario_mode = false,
+     debug_mode = false;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const int QOS = 1;
 mqtt::connect_options connOpts;
 mqtt::client cli(ADDRESS, "driver_app");
 
-void sendMessage(std::string top, std::string data){
+void sendMessage(std::string top, std::string data)
+{
     char* payload =  &data[0];
 
     if (debug_mode) printf("[DEBUG] Trying to send the message: %s %s...\n", top.c_str(), data.c_str());
@@ -290,6 +293,15 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             sendMessage(win, "stop");
             break;
         
+        case 10:
+            if (!scenario_mode)
+                printf("Syntax error: delay command can only be used in scenario mode\n");
+            else {
+                int ms = stoi(args[1]);
+                if (ms >= 0)
+                    usleep(ms * 1000);
+            }
+            break;
     }
 
     return true;
