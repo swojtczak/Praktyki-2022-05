@@ -14,6 +14,8 @@
 #include <sstream>
 
 std::string homeDir;
+bool debug_mode = false;
+
 const std::string ADDRESS {"tcp://localhost:1883"};
 const std::string CLIENT_ID {"driver_app"};
 const int QOS = 1;
@@ -43,12 +45,18 @@ void sendMessage(std::string top, std::string data){
     char* payload =  &data[0];
     
 
+    if (debug_mode) printf("[DEBUG] Trying to send the message: %s %s...\n", top.c_str(), data.c_str());
+
     try {
+        if (debug_mode) printf("[DEBUG] Connecting to the broker...\n");
         cli.connect(connOpts);
+        if (debug_mode) printf("[DEBUG] Connected!\n[DEBUG] Publishing the message...\n");
         cli.publish(top, payload, strlen(payload), 0, false);
         std::string text = "sent message: \"" + data + "\" on topic: " + top + "\n";
         writeOnfile(text);
+        if (debug_mode) printf("[DEBUG] Publishing successful!\n[DEBUG] Disconnecting from the broker...\n");
         cli.disconnect();
+        if (debug_mode) printf("[DEBUG] Disconnected!\n");
     }catch (const mqtt::exception& exc) {
         std::cerr << "Error: " << exc.what() << " [" << exc.get_reason_code() << "]" << std::endl;
         std::string text = "sending message: \"" + data + "\" on topic: " + top + "failed.\n";
@@ -57,12 +65,14 @@ void sendMessage(std::string top, std::string data){
 
 }
 
+
 void my_handler(int s){
     writeOnfile("terminated by user.\n");
     exit(1);
 }
 
-void repl_loop()
+
+void repl_loop(bool debug)
 {
     homeDir = getenv("HOME"); 
     struct sigaction sigIntHandler;
@@ -74,6 +84,7 @@ void repl_loop()
     connOpts.set_keep_alive_interval(20);
     connOpts.set_clean_session(true);
 
+    debug_mode = debug;
     bool status = true;
     int instruction;
     char *line;
@@ -98,7 +109,9 @@ void repl_loop()
         args = split_line(line);
         free(line);
         line = NULL;
+        if (debug_mode) printf("[DEBUG] Looking up the command index...\n");
         instruction = check_operator(args[0]);
+        if (debug_mode && instruction != -1) printf("[DEBUG] %s index found! It's %d\n[DEBUG] Trying to execute the instruction...", args[0].c_str(), instruction);
         status = execute_instruction(instruction, args);
     } while (status);
 }
@@ -117,9 +130,9 @@ int check_operator(std::string op)
         }
     }
 
-    if (found)
+    if (found) {
         return i;
-    else {
+    } else {
         printf("Syntax error: Unknown command - %s\n", op.c_str());
         return -1;
     }
@@ -194,7 +207,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             }
             win = "/car/window/" + std::to_string(window);
             sendMessage(win, "down");
-            // printf("/car/window/%d down\n", window);
             break;
 
         case 3:
@@ -219,7 +231,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             
             win = "/car/window/" + std::to_string(window);
             sendMessage(win, "up");
-            // printf("/car/window/%d up\n", window);
             break;
         
         case 4:
@@ -240,7 +251,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             }
 
             sendMessage(("/car/indicator/" + indicator), "on");
-            // printf("/car/indicator/%s { status: 'on' }\n", indicator.c_str());
             break;
 
         case 5:
@@ -261,7 +271,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             }
 
             sendMessage(("/car/indicator/" + indicator), "off");
-            // printf("/car/indicator/%s { status: 'off' }\n", indicator.c_str());
             break;
 
         case 6:
@@ -276,7 +285,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             }
 
             sendMessage(("/car/wipers/" + args[1]), args[2]);
-            // printf("/car/wipers/%s { status: '%s' }\n", args[1].c_str(), args[2].c_str());
             break;
 
         case 7:
@@ -295,7 +303,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             }
 
             sendMessage(("/car/wipers/" + args[1]), wipers);
-            // printf("/car/wipers/%s { status: '%s' }\n", args[1].c_str(), wipers.c_str());
             break;
 
         case 8:
@@ -305,7 +312,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             }
 
             sendMessage(("/car/wipers/" + args[1]), "off");
-            // printf("/car/wipers/%s { status: 'off' }\n", args[1].c_str());
             break;
 
         case 9:
@@ -330,7 +336,6 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             
             win = "/car/window/" + std::to_string(window);
             sendMessage(win, "stop");
-            // printf("/car/window/%d stop\n", window);
             break;
         
     }
