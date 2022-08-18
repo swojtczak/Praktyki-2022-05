@@ -4,6 +4,11 @@
 #include "mqtt/client.h"
 #include <map>
 #include <array>
+#include <fstream>
+#include <signal.h>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 int moved = 0;
 int val;
@@ -24,16 +29,40 @@ const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
 const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
 const std::string TOPIC 			{ "/car/window/" };
 
+std::string homeDir;
+
+void writeOnfile (std::string text) {
+    std::string path = homeDir + "/.local/share/autox.log";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
+    auto str = oss.str();
+
+    text = "[" + str + "] [windows_control_app:" + CLIENT_ID + "] " + text;
+
+    char* filetext = &text[0];
+    std::ofstream myfile;
+    myfile.open (path, std::fstream::app);
+    
+    myfile << filetext;
+    myfile.close();
+}
+
 void msgHandling(mqtt::const_message_ptr msg){
-    int temp = std::string(msg->get_topic())[12] - 48;
+    std::string topic = std::string(msg->get_topic());
+    int temp = topic[12] - 48;
     int valTemp = szybyFuture[temp];
+    std::string content = std::string(msg->to_string());
+    std::string text = "received message: \"" + content + "\" on topic: " + msg->get_topic() + "\n";
+    writeOnfile(text);
 
     try{
-        valTemp = values.at(std::string(msg->to_string()));
+        valTemp = values.at(content);
     }catch(const std::out_of_range& oor){
 
     }
-
     szybyFuture[temp] = valTemp;
 }
 
@@ -51,16 +80,26 @@ void drawWindows(){
     }
 }
 
+void my_handler(int s){
+    writeOnfile("terminated by user.\n");
+    exit(1);
+}
 
 int main(){
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	auto connOpts = mqtt::connect_options_builder().clean_session(false).finalize();
 
+    homeDir = getenv("HOME"); 
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
     try{
 		cli.start_consuming();
 
-		std::cout << "Connecting to the MQTT server..." << std::flush;
 		auto tok = cli.connect(connOpts);
 		auto rsp = tok->get_connect_response();
 
@@ -68,6 +107,7 @@ int main(){
             cli.subscribe(TOPIC + std::to_string(i), QOS)->wait();
         }
 
+        writeOnfile("connected\n");
 
         while(!false){
             mqtt::const_message_ptr msg;
@@ -86,12 +126,12 @@ int main(){
                 windowState = szyby[x];
                 if(val != 0){
                     szyby[x] = szyby[x] - (szybyFuture[x] / abs(szybyFuture[x]));
-                if(szyby[x] > 9 || szyby[x] < 0){
-                    szyby[x] = windowState;
-                    szybyFuture[x] = 0;
+                    if(szyby[x] > 9 || szyby[x] < 0){
+                        szyby[x] = windowState;
+                        szybyFuture[x] = 0;
+                    }
                 }
             }
-        }
         }
 
 
@@ -101,11 +141,13 @@ int main(){
             cli.stop_consuming();
             cli.disconnect()->wait();
             std::cout << "OK" << std::endl;
+            writeOnfile("disconnected from the server.\n");
         }else{
             std::cout << "\nClient was disconnected" << std::endl;
         }
     }catch (const mqtt::exception& exc) {
         std::cerr << "\n  " << exc << std::endl;
+        writeOnfile("crashed unexpectedly.\n");
         return 1;
     }
     return 0;
