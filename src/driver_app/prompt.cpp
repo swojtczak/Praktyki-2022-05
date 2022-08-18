@@ -16,7 +16,6 @@
 #include <sstream>
 
 std::string homeDir;
-bool debug_mode = false;
 bool scenario_mode = false,
      debug_mode = false;
 std::ifstream sfile;
