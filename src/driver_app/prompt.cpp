@@ -6,7 +6,10 @@
 #include "mqtt/client.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <unistd.h>
 #include "prompt.h"
+
+bool scenario_mode = false;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const int QOS = 1;
@@ -287,6 +290,15 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             // printf("/car/window/%d stop\n", window);
             break;
         
+        case 10:
+            if (!scenario_mode)
+                printf("Syntax error: delay command can only be used in scenario mode\n");
+            else {
+                int ms = stoi(args[1]);
+                if (ms >= 0)
+                    usleep(ms * 1000);
+            }
+            break;
     }
 
     return true;
