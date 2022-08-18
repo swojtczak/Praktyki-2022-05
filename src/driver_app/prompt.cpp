@@ -6,6 +6,7 @@
 #include "mqtt/client.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <unistd.h>
 #include "prompt.h"
 #include <fstream>
 #include <signal.h>
@@ -15,6 +16,8 @@
 
 std::string homeDir;
 bool debug_mode = false;
+bool scenario_mode = false,
+     debug_mode = false;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const std::string CLIENT_ID {"driver_app"};
@@ -41,7 +44,8 @@ void writeOnfile (std::string text) {
     myfile.close();
 }
 
-void sendMessage(std::string top, std::string data){
+void sendMessage(std::string top, std::string data)
+{
     char* payload =  &data[0];
     
 
@@ -338,6 +342,15 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             sendMessage(win, "stop");
             break;
         
+        case 10:
+            if (!scenario_mode)
+                printf("Syntax error: delay command can only be used in scenario mode\n");
+            else {
+                int ms = stoi(args[1]);
+                if (ms >= 0)
+                    usleep(ms * 1000);
+            }
+            break;
     }
 
     return true;
