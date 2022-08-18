@@ -21,7 +21,7 @@ std::array<int, 4> szybyFuture = {0,0,0,0};
 const int  QOS = 1;
 
 const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
+const std::string CLIENT_ID		{ "windows_control_app" };
 const std::string TOPIC 			{ "/car/window/" };
 
 void msgHandling(mqtt::const_message_ptr msg){
@@ -55,7 +55,7 @@ void drawWindows(){
 int main(){
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
-	auto connOpts = mqtt::connect_options_builder().clean_session(false).finalize();
+	auto connOpts = mqtt::connect_options_builder().clean_session(true).finalize();
 
     try{
 		cli.start_consuming();

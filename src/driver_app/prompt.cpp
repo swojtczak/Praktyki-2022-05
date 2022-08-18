@@ -1,16 +1,19 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include "mqtt/client.h"
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "prompt.h"
 
 bool scenario_mode = false,
      debug_mode = false;
+std::ifstream sfile;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const int QOS = 1;
@@ -43,31 +46,39 @@ void repl_loop(bool debug)
     connOpts.set_clean_session(true);
 
     debug_mode = debug;
+
     bool status = true;
     int instruction;
     char *line;
-    std::string op;
+    std::string temp;
     std::vector<std::string> args;
 
     do {
-        // std::cout << PROMPT;
-        // std::getline(std::cin, line);
-        line = readline(PROMPT);
-
-        if (line == NULL) {
+        if (scenario_mode) {
             free(line);
-            exit(0);
-        } else if (strlen(line) == 0)
-            continue;
-        else
-            add_history(line);
-        
+            if(!std::getline(sfile, temp)){
+                sfile.close();
+                scenario_mode = false;
+            }
+            line = strdup(temp.c_str());
+        } else {
+            line = readline(PROMPT);
+
+            if (line == NULL) {
+                free(line);
+                exit(0);
+            } else if (strlen(line) == 0)
+                continue;
+            else
+                add_history(line);
+        }
+
         args = split_line(line);
         free(line);
         line = NULL;
         if (debug_mode) printf("[DEBUG] Looking up the command index...\n");
         instruction = check_operator(args[0]);
-        if (debug_mode && instruction != -1) printf("[DEBUG] %s index found! It's %d\n[DEBUG] Trying to execute the instruction...", args[0].c_str(), instruction);
+        if (debug_mode && instruction != -1) printf("[DEBUG] %s index found! It's %d\n[DEBUG] Trying to execute the instruction...\n", args[0].c_str(), instruction);
         status = execute_instruction(instruction, args);
     } while (status);
 }
@@ -292,7 +303,7 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             win = "/car/window/" + std::to_string(window);
             sendMessage(win, "stop");
             break;
-        
+
         case 10:
             if (!scenario_mode)
                 printf("Syntax error: delay command can only be used in scenario mode\n");
@@ -302,6 +313,32 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                     usleep(ms * 1000);
             }
             break;
+
+        case 11:
+            if (scenario_mode) {
+                printf("Syntax error: run command cannot be used in scenario mode\n");
+                return true;
+            }
+
+            if (access(args[1].c_str(), F_OK) == 0) {
+                sfile.open(args[1]);
+
+                if(!sfile) {
+                    printf("Error: Couldn't open the scenario file - %s\n", args[1].c_str());
+                    return true;
+                }
+                std::string tmp;
+                std::getline(sfile, tmp);
+                if(tmp != "autox")
+                {
+                    printf("Error: Not a vaild scenario file - %s\n", args[1].c_str());
+                    sfile.close();
+                    return true;
+                }
+                scenario_mode = true;
+            }
+            break;
+
     }
 
     return true;

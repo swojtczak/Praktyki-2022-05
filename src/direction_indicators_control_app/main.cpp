@@ -21,7 +21,7 @@ char indicators_array[4][3][8]  {{{'/', '-', '-', '-', '-', '-', '-', '|'},
 const int  QOS = 1;
 
 const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
+const std::string CLIENT_ID		{ "directio_indicators_control_app" };
 const std::string TOPIC 			{ "/car/indicator/" };
 
 struct Indicators 
@@ -118,7 +118,7 @@ int main()
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	auto connOpts = mqtt::connect_options_builder()
-		.clean_session(false)
+		.clean_session(true)
 		.finalize();
 
     try 
