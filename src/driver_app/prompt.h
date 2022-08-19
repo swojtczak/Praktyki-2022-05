@@ -14,6 +14,7 @@ turn_off <left or right> indicator \t\t-> turn off the specified indicator\n\
 wipe <front or back> <on or once> \t\t-> turn on the specified wipers in single or continous mode\n\
 wipe_w_fluid <front or back> <on or once> \t\t-> turn on the specified wipers and sprinklers in single or continous mode\n\
 wipe_off <front or back> \t\t-> turn off the specified wipers\n\
+run <file>\t\t-> run the scenario file\n\
 "
 
 
@@ -34,6 +35,7 @@ const struct command command_list[] = {
     {"wipe_off",    2},
     {"stop",        3},
     {"delay",       2},
+    {"run",         2},
 };
 
 
