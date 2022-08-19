@@ -44,7 +44,7 @@ const struct command command_list[] = {
 
 
 void repl_loop(bool debug);
-int check_operator(std::string op);
+int check_operator(std::string op, bool silentRun);
 std::vector<std::string> split_line(char *line);
 bool execute_instruction(int instruction, std::vector<std::string> args);
-void recordAction(char* command);
+void recordAction(char* command, std::string fileName);

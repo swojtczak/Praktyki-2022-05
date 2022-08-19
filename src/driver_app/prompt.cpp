@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <readline/chardefs.h>
 #include <string>
 #include "mqtt/client.h"
 #include <readline/readline.h>
@@ -17,8 +18,12 @@
 
 std::string homeDir;
 bool scenario_mode = false,
-     debug_mode = false;
+     debug_mode = false,
+     recording = false;
 std::ifstream sfile;
+
+std::string scenarioDir = "../Scenarios/";
+std::string fileName;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const std::string CLIENT_ID {"driver_app"};
@@ -120,17 +125,22 @@ void repl_loop(bool debug)
         }
 
         args = split_line(line);
+        
+        if(recording && args[0] != "help" && args[0] != "stop_rec" && args.size() == command_list[check_operator(args[0], true)].len){
+            recordAction(line, fileName);
+        }
+
         free(line);
         line = NULL;
         if (debug_mode) printf("[DEBUG] Looking up the command index...\n");
-        instruction = check_operator(args[0]);
+        instruction = check_operator(args[0], false);
         if (debug_mode && instruction != -1) printf("[DEBUG] %s index found! It's %d\n[DEBUG] Trying to execute the instruction...\n", args[0].c_str(), instruction);
         status = execute_instruction(instruction, args);
     } while (status);
 }
 
 
-int check_operator(std::string op)
+int check_operator(std::string op, bool silentRun)
 {
     int i;
     bool found = false;
@@ -146,7 +156,7 @@ int check_operator(std::string op)
     if (found) {
         return i;
     } else {
-        printf("Syntax error: Unknown command - %s\n", op.c_str());
+        if(!silentRun) printf("Syntax error: Unknown command - %s\n", op.c_str());
         return -1;
     }
 }
@@ -385,8 +395,69 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 scenario_mode = true;
             }
             break;
+        case 12:
+            if (scenario_mode) {
+                printf("Syntax error: record command cannot be used in scenario mode\n");
+                return true;
+            }
+
+            if(args[1].empty()){
+                 printf("Syntax error: no file name given %s\n", args[1].c_str());
+                return true;
+            }
+            else{
+                fileName = args[1];
+
+                std::ofstream scenarioFile(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
+                scenarioFile << "autox\n";
+                scenarioFile.close();
+
+                recording = true;
+            }
+            break;
+
+        case 13:
+            if (scenario_mode) {
+                printf("Syntax error: stop_rec command cannot be used in scenario mode\n");
+                return true;
+            }
+
+            if(args.size() == 1){
+                printf("Syntax error: too much arguments %s\n", args[1].c_str());
+                return true;
+            }
+
+            recording = false;
+            break;
 
     }
 
     return true;
+
+    /*
+std::string fileName;
+        bool syntaxCorrect;
+
+        if(args[0] == "record"){
+            fileName = args[1];
+
+            std::ofstream scenarioFile(scenarioDir + fileName + ".autox");
+            scenarioFile << "autox\n";
+            scenarioFile.close();
+
+            recording = true;
+
+            continue;
+        }
+        else if(args[0] == "stop_rec") recording = false;
+
+        if(recording){
+            recordAction(line, fileName);
+        }
+    */
+}
+
+void recordAction(char *command, std::string fileName){
+    std::ofstream scenarioFile(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
+    scenarioFile << command << std::endl;
 }
