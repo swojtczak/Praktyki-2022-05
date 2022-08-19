@@ -28,15 +28,14 @@ std::string homeDir;
 const int  QOS = 1;
 
 const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
-const std::string CLIENT_ID		{ "paho_cpp_async_consume" };
+const std::string CLIENT_ID		{ "indicators" };
 const std::string TOPIC 			{ "/car/indicator/" };
 
 struct Indicators 
 {
     bool left = false;
     bool right = false;
-    bool prev_left = false;
-    bool prev_right = false;
+    bool hazard = false;
 
     void setLeft(bool value)
     {
@@ -54,20 +53,7 @@ struct Indicators
 
     void setHazard(bool value)
     {
-        if (!value)
-        {
-            left = prev_left;
-            right = prev_right;
-        }
-        else
-        {   
-            prev_left = left;
-            prev_right = right;
-            left = value;
-            right = value;
-        }
-
-        
+        hazard = value;
     }
 }indicators;
 
@@ -130,7 +116,14 @@ void drawIndicators(bool state)
         {
             if(j < 8)
             {
-                std::cout << indicators_array[indicators.left ? state : 0][i][j];
+                if (indicators.hazard)
+                {
+                    std::cout << indicators_array[state][i][j];
+                }
+                else 
+                {
+                    std::cout << indicators_array[indicators.left ? state : 0][i][j];
+                }
             }
             else if (j < 11)
             {
@@ -138,7 +131,14 @@ void drawIndicators(bool state)
             }
             else
             {
-                std::cout << indicators_array[state ? 2 + indicators.right : 2][i][j - 11];
+                if (indicators.hazard)
+                {
+                    std::cout << indicators_array[state + 2][i][j - 11];
+                }
+                else 
+                {
+                    std::cout << indicators_array[state ? 2 + indicators.right : 2][i][j - 11];
+                }
             }
         }
         std::cout << "\n";
@@ -195,7 +195,7 @@ int main()
             
 
             drawIndicators(state);
-            sleep(1);
+            usleep(100000);
             state = !state;
 		}
 
