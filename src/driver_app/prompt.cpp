@@ -24,6 +24,7 @@ std::ifstream sfile;
 
 std::string scenarioDir = "../Scenarios/";
 std::string fileName;
+std::ofstream scenarioFile;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const std::string CLIENT_ID {"driver_app"};
@@ -126,17 +127,20 @@ void repl_loop(bool debug)
 
         args = split_line(line);
         
-        if(recording && args[0] != "help" && args[0] != "stop_rec" && args.size() == command_list[check_operator(args[0], true)].len){
+        /*if(recording && args[0] != "help" && args[0] != "stop_rec" && args.size() == command_list[check_operator(args[0], true)].len){
             recordAction(line, fileName);
-        }
+        }*/
 
-        free(line);
-        line = NULL;
         if (debug_mode) printf("[DEBUG] Looking up the command index...\n");
         instruction = check_operator(args[0], false);
         if (debug_mode && instruction != -1) printf("[DEBUG] %s index found! It's %d\n[DEBUG] Trying to execute the instruction...\n", args[0].c_str(), instruction);
         status = execute_instruction(instruction, args);
-    } while (status);
+        
+        if(recording && status && args[0] != "help" && args[0] != "stop_rec" && args[0] != "record") recordAction(line, fileName);
+
+        free(line);
+        line = NULL;
+    } while (true);
 }
 
 
@@ -186,10 +190,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
     if (instruction >= 0) {
         if (args.size() > command_list[instruction].len) {
             printf("Syntax error: too many arguments - %zu\n", args.size());
-            return true;
+            return false;
         } else if (args.size() < command_list[instruction].len) {
             printf("Syntax error: too little arguments - %zu\n", args.size());
-            return true;
+            return false;
         }
     }
     
@@ -340,7 +344,7 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
         case 9:
             if (args[2].compare("window")) {
                 printf("Syntax error: unknown argument - %s\n", args[2].c_str());
-                return true;
+                return false;
             }
 
             if (!args[1].compare("front-left"))
@@ -353,7 +357,7 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 window = 3;
             else {
                 printf("Syntax error: unknown argument - %s\n", args[1].c_str());
-                return true;
+                return false;
             }
 
             
@@ -408,7 +412,7 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             else{
                 fileName = args[1];
 
-                std::ofstream scenarioFile(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
+                scenarioFile.open(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
                 scenarioFile << "autox\n";
                 scenarioFile.close();
 
@@ -422,10 +426,19 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 return true;
             }
 
-            if(args.size() == 1){
+            if(!recording){
+                printf("Syntax error: stop_rec command cannot be used in while not recording\n");
+                return true;
+            }
+
+            if(args.size() != 1){
                 printf("Syntax error: too much arguments %s\n", args[1].c_str());
                 return true;
             }
+
+            if(scenarioFile.is_open()) scenarioFile.close();
+
+            printf("Recording stopped\n");
 
             recording = false;
             break;
@@ -433,31 +446,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
     }
 
     return true;
-
-    /*
-std::string fileName;
-        bool syntaxCorrect;
-
-        if(args[0] == "record"){
-            fileName = args[1];
-
-            std::ofstream scenarioFile(scenarioDir + fileName + ".autox");
-            scenarioFile << "autox\n";
-            scenarioFile.close();
-
-            recording = true;
-
-            continue;
-        }
-        else if(args[0] == "stop_rec") recording = false;
-
-        if(recording){
-            recordAction(line, fileName);
-        }
-    */
 }
 
 void recordAction(char *command, std::string fileName){
-    std::ofstream scenarioFile(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
+    scenarioFile.open(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
     scenarioFile << command << std::endl;
+    scenarioFile.close();
 }
