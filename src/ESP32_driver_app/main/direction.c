@@ -62,8 +62,6 @@ void readDirection(void * arg)
             vTaskDelay(20);
             if (debounce > 0)
             {
-                ESP_LOGI(TAG, "dupa");
-                
                 if (hazard)
                 {
                     esp_mqtt_client_publish(client, "/car/indicator/hazard", "off", 0, 0, 0);
@@ -78,8 +76,6 @@ void readDirection(void * arg)
                 
                 continue;
             }
-
-            ESP_LOGI(TAG, "dupa dupa");
 
             esp_mqtt_client_publish(client, "/car/indicator/left", "off", 0, 0, 0);
             esp_mqtt_client_publish(client, "/car/indicator/right", "off", 0, 0, 0);
