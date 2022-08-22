@@ -15,6 +15,9 @@ wipe <front or back> <on or once> \t\t-> turn on the specified wipers in single 
 wipe_w_fluid <front or back> <on or once> \t\t-> turn on the specified wipers and sprinklers in single or continous mode\n\
 wipe_off <front or back> \t\t-> turn off the specified wipers\n\
 run <file>\t\t-> run the scenario file\n\
+record <file>\t\t-> record the scenario to a file\n\
+delay <milliseconds>\t\t-> sets delay beetween actions\n\
+stop_rec\t\t-> stop recording the scenario\n\
 "
 
 
@@ -36,10 +39,13 @@ const struct command command_list[] = {
     {"stop",        3},
     {"delay",       2},
     {"run",         2},
+    {"record",      2},
+    {"stop_rec",        1},
 };
 
 
 void repl_loop(bool debug);
-int check_operator(std::string op);
+int check_operator(std::string op, bool silentRun);
 std::vector<std::string> split_line(char *line);
 bool execute_instruction(int instruction, std::vector<std::string> args);
+void recordAction(char* command, std::string fileName);

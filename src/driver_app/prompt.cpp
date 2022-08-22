@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <readline/chardefs.h>
 #include <string>
 #include "mqtt/client.h"
 #include <readline/readline.h>
@@ -17,8 +18,14 @@
 
 std::string homeDir;
 bool scenario_mode = false,
-     debug_mode = false;
+     debug_mode = false,
+     recording = false;
 std::ifstream sfile;
+
+std::string scenarioDir = "../Scenarios/";
+std::string fileName;
+std::ofstream scenarioFile;
+bool commandExecuted;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
 const std::string CLIENT_ID {"driver_app"};
@@ -120,17 +127,26 @@ void repl_loop(bool debug)
         }
 
         args = split_line(line);
-        free(line);
-        line = NULL;
+        
+        /*if(recording && args[0] != "help" && args[0] != "stop_rec" && args.size() == command_list[check_operator(args[0], true)].len){
+            recordAction(line, fileName);
+        }*/
+
         if (debug_mode) printf("[DEBUG] Looking up the command index...\n");
-        instruction = check_operator(args[0]);
+        instruction = check_operator(args[0], false);
         if (debug_mode && instruction != -1) printf("[DEBUG] %s index found! It's %d\n[DEBUG] Trying to execute the instruction...\n", args[0].c_str(), instruction);
         status = execute_instruction(instruction, args);
-    } while (status);
+        
+        if(recording && status && commandExecuted && args[0] != "help" && args[0] != "stop_rec" && args[0] != "record" && instruction != -1) recordAction(line, fileName);
+        commandExecuted = false;
+
+        free(line);
+        line = NULL;
+    } while (true);
 }
 
 
-int check_operator(std::string op)
+int check_operator(std::string op, bool silentRun)
 {
     int i;
     bool found = false;
@@ -146,7 +162,7 @@ int check_operator(std::string op)
     if (found) {
         return i;
     } else {
-        printf("Syntax error: Unknown command - %s\n", op.c_str());
+        if(!silentRun) printf("Syntax error: Unknown command - %s\n", op.c_str());
         return -1;
     }
 }
@@ -176,10 +192,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
     if (instruction >= 0) {
         if (args.size() > command_list[instruction].len) {
             printf("Syntax error: too many arguments - %zu\n", args.size());
-            return true;
+            return false;
         } else if (args.size() < command_list[instruction].len) {
             printf("Syntax error: too little arguments - %zu\n", args.size());
-            return true;
+            return false;
         }
     }
     
@@ -218,8 +234,11 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 printf("Syntax error: unknown argument - %s\n", args[1].c_str());
                 return true;
             }
-            win = "/car/window/" + std::to_string(window);
+            if(!recording)
+                win = "/car/window/" + std::to_string(window);
+
             sendMessage(win, "down");
+            commandExecuted = true;
             break;
 
         case 3:
@@ -241,9 +260,11 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 return true;
             }
 
-            
-            win = "/car/window/" + std::to_string(window);
+            if(!recording)
+                win = "/car/window/" + std::to_string(window);
+
             sendMessage(win, "up");
+            commandExecuted = true;
             break;
         
         case 4:
@@ -262,8 +283,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 printf("Syntax error: unknown argument - %s\n", args[1].c_str());
                 return true;
             }
+            if(!recording)
+                sendMessage(("/car/indicator/" + indicator), "on");
 
-            sendMessage(("/car/indicator/" + indicator), "on");
+            commandExecuted = true;
             break;
 
         case 5:
@@ -282,8 +305,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 printf("Syntax error: unknown argument - %s\n", args[1].c_str());
                 return true;
             }
+            if(!recording)
+                sendMessage(("/car/indicator/" + indicator), "off");
 
-            sendMessage(("/car/indicator/" + indicator), "off");
+            commandExecuted = true;
             break;
 
         case 6:
@@ -296,8 +321,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 printf("Syntax error: unknown argument - %s\n", args[2].c_str());
                 return true;
             }
+            if(!recording)
+                sendMessage(("/car/wipers/" + args[1]), args[2]);
 
-            sendMessage(("/car/wipers/" + args[1]), args[2]);
+            commandExecuted = true;
             break;
 
         case 7:
@@ -314,8 +341,10 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 printf("Syntax error: unknown argument - %s\n", args[2].c_str());
                 return true;
             }
+            if(!recording)
+                sendMessage(("/car/wipers/" + args[1]), wipers);
 
-            sendMessage(("/car/wipers/" + args[1]), wipers);
+            commandExecuted = true;
             break;
 
         case 8:
@@ -323,14 +352,16 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 printf("Syntax error: unknown argument - %s\n", args[1].c_str());
                 return true;
             }
+            if(!recording)
+                sendMessage(("/car/wipers/" + args[1]), "off");
 
-            sendMessage(("/car/wipers/" + args[1]), "off");
+            commandExecuted = true;
             break;
 
         case 9:
             if (args[2].compare("window")) {
                 printf("Syntax error: unknown argument - %s\n", args[2].c_str());
-                return true;
+                return false;
             }
 
             if (!args[1].compare("front-left"))
@@ -343,18 +374,25 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 window = 3;
             else {
                 printf("Syntax error: unknown argument - %s\n", args[1].c_str());
-                return true;
+                return false;
             }
-
             
             win = "/car/window/" + std::to_string(window);
-            sendMessage(win, "stop");
+
+            if(!recording)
+                sendMessage(win, "stop");
+                
+            commandExecuted = true;
             break;
 
         case 10:
-            if (!scenario_mode)
-                printf("Syntax error: delay command can only be used in scenario mode\n");
+            if (!scenario_mode && !recording)
+                printf("Syntax error: delay command can only be used in scenario or record mode\n");
             else {
+                commandExecuted = true;
+                
+                if(recording) break;
+
                 int ms = stoi(args[1]);
                 if (ms >= 0)
                     usleep(ms * 1000);
@@ -362,8 +400,8 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
             break;
 
         case 11:
-            if (scenario_mode) {
-                printf("Syntax error: run command cannot be used in scenario mode\n");
+            if (scenario_mode || recording) {
+                printf("Syntax error: run command cannot be used in scenario or recording mode\n");
                 return true;
             }
 
@@ -385,8 +423,63 @@ bool execute_instruction(int instruction, std::vector<std::string> args)
                 scenario_mode = true;
             }
             break;
+        case 12:
+            if (scenario_mode) {
+                printf("Syntax error: record command cannot be used in scenario mode\n");
+                return true;
+            }
+
+            if(args[1].empty()){
+                 printf("Syntax error: no file name given %s\n", args[1].c_str());
+                return true;
+            }
+            else{
+                fileName = args[1];;
+
+                //Clearing content of scenario file
+                scenarioFile.open(scenarioDir + fileName + ".autox", std::ofstream::out | std::ofstream::trunc);
+                scenarioFile.close();
+
+                scenarioFile.open(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
+                scenarioFile << "autox";
+                scenarioFile.close();
+
+                recording = true;
+            }
+            break;
+
+        case 13:
+            if (scenario_mode) {
+                printf("Syntax error: stop_rec command cannot be used in scenario mode\n");
+                return true;
+            }
+
+            if(!recording){
+                printf("Syntax error: stop_rec command cannot be used in while not recording\n");
+                return true;
+            }
+
+            if(args.size() != 1){
+                printf("Syntax error: too much arguments %s\n", args[1].c_str());
+                return true;
+            }
+
+            if(scenarioFile.is_open()) scenarioFile.close();
+
+            printf("Recording stopped\n");
+
+            recording = false;
+            break;
 
     }
 
     return true;
 }
+
+void recordAction(char *command, std::string fileName){
+    scenarioFile.open(scenarioDir + fileName + ".autox",std::ios::out|std::ios::app);
+    scenarioFile << std::endl << command;
+    scenarioFile.close();
+}
+
+
