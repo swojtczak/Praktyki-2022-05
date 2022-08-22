@@ -31,6 +31,7 @@ const std::string SERVER_ADDRESS	{ "tcp://localhost:1883" };
 const std::string CLIENT_ID		{ "direction_indicators_control_app" };
 const std::string TOPIC 			{ "/car/indicator/" };
 
+// Strunct stores current state of indicators
 struct Indicators 
 {
     bool left = false;
@@ -57,36 +58,17 @@ struct Indicators
     }
 }indicators;
 
-void writeOnfile (std::string text) {
-    std::string path = homeDir + "/.local/share/autox.log";
-
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
-    auto str = oss.str();
-
-    text = "[" + str + "] [direction_indicators_control_app:" + CLIENT_ID + "] " + text;
-
-    char* filetext = &text[0];
-    std::ofstream myfile;
-    myfile.open (path, std::fstream::app);
-    
-    myfile << filetext;
-    myfile.close();
-}
-
-void my_handler(int s){
-    writeOnfile("terminated by user.\n");
-    exit(1);
-}
-
+// Function select action to be executed
+//
+// topic - topic from which the message was received
+// payload - message payload
 void selectAction(std::string topic, std::string payload)
 {
-    std::string text = "received message: \"" + payload + "\" on topic: " + topic + "\n";
-    writeOnfile(text);
+    //writeOnfile("received message: \"" + payload + "\" on topic: " + topic + "\n");
 
+    std::string text = "received message: \"" + payload + "\" on topic: " + topic + "\n";
     std::string direction = topic.erase(0, 15);
+
     std::map<std::string, int> const topic_cast = { {"left", 0}, {"right", 1}, {"hazard", 2}};
     std::map<std::string, bool> const payload_cast = { {"off", false}, {"on", true}};
 
@@ -104,7 +86,9 @@ void selectAction(std::string topic, std::string payload)
     }
 }
 
-
+// Function draws indicators from indicator array
+//
+// state - chooses whether to keep the lights on or not
 void drawIndicators(bool state)
 {
 
@@ -147,14 +131,43 @@ void drawIndicators(bool state)
     std::cout << "\n";
 }
 
+/*//writes info to log file
+void writeOnfile (std::string text) {
+    std::string path = homeDir + "/.local/share/autox.log";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M");
+    auto str = oss.str();
+
+    text = "[" + str + "] [direction_indicators_control_app:" + CLIENT_ID + "] " + text;
+
+    char* filetext = &text[0];
+    std::ofstream myfile;
+    myfile.open (path, std::fstream::app);
+    
+    myfile << filetext;
+    myfile.close();
+}*/
+
+/*//control c handler
+void my_handler(int s){
+    writeOnfile("terminated by user.\n");
+    exit(1);
+}*/
+
+// main
 int main()
 {
-    homeDir = getenv("HOME"); 
+    
+    /*homeDir = getenv("HOME"); 
     struct sigaction sigIntHandler;
     sigIntHandler.sa_handler = my_handler;
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
-    sigaction(SIGINT, &sigIntHandler, NULL);
+    sigaction(SIGINT, &sigIntHandler, NULL);*/
+
 
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
@@ -178,7 +191,7 @@ int main()
         }
 		
 		std::cout << "Connected and redy to run" << std::endl;
-        writeOnfile("connected\n");
+        //writeOnfile("connected\n");
 
         bool state = false;
 
@@ -204,11 +217,11 @@ int main()
 		if (cli.is_connected()) 
         {
 			std::cout << "\nShutting down and disconnecting from the MQTT server..." << std::flush;
+            //writeOnfile("disconnected from the server.\n");
 			cli.unsubscribe(TOPIC)->wait();
 			cli.stop_consuming();
 			cli.disconnect()->wait();
 			std::cout << "OK" << std::endl;
-            writeOnfile("disconnected from the server.\n");
 		}
 		else 
         {
@@ -218,7 +231,7 @@ int main()
 	catch (const mqtt::exception& exc) 
     {
 		std::cerr << "\n  " << exc << std::endl;
-        writeOnfile("crashed unexpectedly.\n");
+        //writeOnfile("crashed unexpectedly.\n")
 		return 1;
 	}
 
