@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <!-- interface-css-provider-path driver.css -->
+  <object class="GtkTextBuffer" id="textbufferDirection">
+    <property name="text" translatable="yes">Direction indicators:</property>
+  </object>
+  <object class="GtkTextBuffer" id="textbufferLog">
+    <property name="text" translatable="yes">								</property>
+  </object>
+  <object class="GtkTextBuffer" id="textbufferWindows">
+    <property name="text" translatable="yes">Windows:</property>
+  </object>
+  <object class="GtkTextBuffer" id="textbufferWipers">
+    <property name="text" translatable="yes">	Front:
+Window:
+	 Back:</property>
+  </object>
+  <object class="GtkWindow" id="Window">
+    <property name="can-focus">False</property>
+    <property name="destroy-with-parent">True</property>
+    <child>
+      <object class="GtkFixed" id="Fixed">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <!-- n-columns=4 n-rows=2 -->
+          <object class="GtkGrid" id="wipersGrid">
+            <property name="width-request">400</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="tooltip-markup" translatable="yes">Hello bozo</property>
+            <property name="row-homogeneous">True</property>
+            <child>
+              <object class="GtkButton" id="buttonFrontWipeOnce">
+                <property name="label" translatable="yes">Wipe Once</property>
+                <property name="name">buttonWipeOnce</property>
+                <property name="visible">True</property>
+                <property name="app-paintable">True</property>
+                <property name="can-focus">True</property>
+                <property name="can-default">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-markup" translatable="yes">Wipe once</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonFrontWipeOncewFluid">
+                <property name="label" translatable="yes">Wipe Once With Fluid</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonFrontStartWiping">
+                <property name="label" translatable="yes">Start Wiping</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonFrontStartWipingwFluid">
+                <property name="label" translatable="yes">Start Wiping With Fluid</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">3</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonBackStartWipingwFluid">
+                <property name="label" translatable="yes">Start Wiping With Fluid</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">3</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonBackStartWiping">
+                <property name="label" translatable="yes">Start Wiping</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonBackWipeOncewFluid">
+                <property name="label" translatable="yes">Wipe Once With Fluid</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonBackWipeOnce">
+                <property name="label" translatable="yes">Wipe Once</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="x">116</property>
+            <property name="y">550</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="textLog">
+            <property name="height-request">670</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="halign">end</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="hscroll-policy">natural</property>
+            <property name="vscroll-policy">natural</property>
+            <property name="buffer">textbufferLog</property>
+            <property name="monospace">True</property>
+          </object>
+          <packing>
+            <property name="x">700</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="textWipers">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="buffer">textbufferWipers</property>
+            <property name="monospace">True</property>
+          </object>
+          <packing>
+            <property name="x">3</property>
+            <property name="y">562</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="textDirection">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">False</property>
+            <property name="buffer">textbufferDirection</property>
+            <property name="monospace">True</property>
+          </object>
+          <packing>
+            <property name="x">3</property>
+            <property name="y">266</property>
+          </packing>
+        </child>
+        <child>
+          <!-- n-columns=1 n-rows=3 -->
+          <object class="GtkGrid" id="directionGrid">
+            <property name="width-request">100</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="row-homogeneous">True</property>
+            <child>
+              <object class="GtkButton" id="buttonLeft">
+                <property name="label" translatable="yes">Left</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonRight">
+                <property name="label" translatable="yes">Right</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonHazard">
+                <property name="label" translatable="yes">Hazard</property>
+                <property name="name">buttonHazard</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <style>
+                  <class name="oro"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="x">175</property>
+            <property name="y">223</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="textWindows">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="buffer">textbufferWindows</property>
+            <property name="monospace">True</property>
+          </object>
+          <packing>
+            <property name="x">3</property>
+            <property name="y">64</property>
+          </packing>
+        </child>
+        <child>
+          <!-- n-columns=2 n-rows=4 -->
+          <object class="GtkGrid">
+            <property name="width-request">100</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkButton" id="frontLeftUp">
+                <property name="label">gtk-go-up</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="frontRightUp">
+                <property name="label">gtk-go-up</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="backLeftDown">
+                <property name="label">gtk-go-down</property>
+                <property name="visible">True</property>
+                <property name="app-paintable">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="FrontLeftDown">
+                <property name="label">gtk-go-down</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="backLeftUp">
+                <property name="label">gtk-go-up</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="backRightDown">
+                <property name="label">gtk-go-down</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="backRightUp">
+                <property name="label">gtk-go-up</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="frontRightDown">
+                <property name="label">gtk-go-down</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="x">106</property>
+            <property name="y">6</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <style>
+      <class name="background-color=&quot;pink&quot;;"/>
+    </style>
+  </object>
+</interface>
