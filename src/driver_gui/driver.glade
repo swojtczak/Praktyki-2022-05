@@ -7,7 +7,7 @@
     <property name="text" translatable="yes">Direction indicators:</property>
   </object>
   <object class="GtkTextBuffer" id="textbufferLog">
-    <property name="text" translatable="yes">								sii</property>
+    <property name="text" translatable="yes">								</property>
   </object>
   <object class="GtkTextBuffer" id="textbufferWindows">
     <property name="text" translatable="yes">Windows:</property>
