@@ -1,10 +1,9 @@
+#include "prompt.h"
 #include <cstring>
 #include <iostream>
 #include <unistd.h>
-#include "prompt.h"
 
 bool debug = false;
-
 
 int main(int argc, char **argv)
 {
@@ -24,7 +23,7 @@ int main(int argc, char **argv)
                 break;
         }
     }
-    
+
     repl_loop(debug);
 
     return 0;

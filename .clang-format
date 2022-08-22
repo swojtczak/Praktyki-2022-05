@@ -1,8 +1,9 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 BreakBeforeBraces: Linux
+AlignConsecutiveAssignments: true
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: true
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 1
 PointerAlignment: Right
 ColumnLimit: 0
