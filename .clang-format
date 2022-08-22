@@ -1,0 +1,8 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+BreakBeforeBraces: Linux
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: true
+MaxEmptyLinesToKeep: 2
+PointerAlignment: Right
+ColumnLimit: 0
