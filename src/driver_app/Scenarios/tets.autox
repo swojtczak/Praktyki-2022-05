@@ -1,0 +1,4 @@
+autox
+wipe_w_fluid front once
+delay 10000
+wipe front on
