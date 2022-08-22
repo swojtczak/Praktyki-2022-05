@@ -25,6 +25,8 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
+#include "direction.h"
+
 static const char *TAG = "ESP32_DRIVER";
 
 #define CONFIG_BROKER_URL "mqtt://192.168.1.79:1883"
@@ -34,23 +36,24 @@ static const char *TAG = "ESP32_DRIVER";
 
 #define POTPIN ADC1_CHANNEL_5
 
-static SemaphoreHandle_t s_timer_sem;
 esp_mqtt_client_handle_t client;
 bool connected = false;
+
+static SemaphoreHandle_t s_timer_sem;
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
     if (error_code != 0) ESP_LOGE(TAG, "Last error %s: 0x%x", message, error_code);
 }
 
-static bool IRAM_ATTR timer_group_isr_callback(void * args) 
+static bool IRAM_ATTR timer_group_isr_callback(void *args) 
 {
     BaseType_t high_task_awoken = pdFALSE;
     xSemaphoreGiveFromISR(s_timer_sem, &high_task_awoken);
     return (high_task_awoken == pdTRUE);
 }
 
-static void createTimer()
+void createTimer()
 {
     timer_config_t config = {
         .divider = TIMER_DIVIDER,
@@ -95,8 +98,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     case MQTT_EVENT_UNSUBSCRIBED:
         break;
     case MQTT_EVENT_PUBLISHED:
+        ESP_LOGI(TAG, "Got data");
         break;
     case MQTT_EVENT_DATA:
+        ESP_LOGI(TAG, "Got data");
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGW(TAG, "MQTT_EVENT_ERROR");
@@ -133,7 +138,9 @@ int32_t toAngle(uint32_t reading)
 
 void readAnalog(void * arg)
 {
-    static char text[10];
+    createTimer();
+
+    char payload[10];
     uint32_t adc_reading = 0;
 
     while (true)
@@ -144,8 +151,8 @@ void readAnalog(void * arg)
 
             adc_reading /= NO_OF_SAMPLES;
 
-            sprintf(text, "%d", toAngle(adc_reading));
-            esp_mqtt_client_publish(client, "/car/wheel/angle", text, 0, 0, 0);
+            sprintf(payload, "%d", toAngle(adc_reading));
+            esp_mqtt_client_publish(client, "/car/wheel/angle", payload, 0, 0, 0);
 
             printf("wyslano %d\n", toAngle(adc_reading));
         }
@@ -160,9 +167,10 @@ void app_main(void)
     if (s_timer_sem == NULL)  printf("Binary semaphore can not be created");
 
     xTaskCreate(readAnalog, "ReadAnalog", 1024 * 10, NULL, 1, NULL);
+    xTaskCreate(readDirection, "ReadDirection", 1024 * 10, NULL, 1, NULL);
 
     adc1_config_width( ADC_WIDTH_BIT_12 );
-    adc1_config_channel_atten( POTPIN, ADC_ATTEN_DB_11);
+    adc1_config_channel_atten( POTPIN, ADC_ATTEN_DB_0);
 
     esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("MQTT_CLIENT", ESP_LOG_VERBOSE);
@@ -178,6 +186,4 @@ void app_main(void)
     ESP_ERROR_CHECK(example_connect());
 
     mqtt_app_start();
-
-    createTimer();
 }
