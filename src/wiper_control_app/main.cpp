@@ -11,6 +11,7 @@
 
 std::string homeDir;
 
+
 //std::cout<< u8"\033[2J\033[1;1H"; - ANSI Escape sequence clearing terminal
 
 const std::string SERVER_ADDRESS { "tcp://localhost:1883" };
@@ -20,7 +21,12 @@ const std::string TOPIC_WB { "/car/wipers/back" };
 
 const int QOS = 1;
 
-bool stopWiping;
+enum modes {frontOn, frontOnce, frontFluidOnce, frontFluid, frontOff, backOn, backOnce, backFluidOnce, backFluid, backOff};
+
+enum infoFromBroker {on, off, once, fluid, fluid_once};
+std::map<std::string, infoFromBroker> infoFromBrokerMap;
+
+bool stopWiping, finished;
 int mode = 0;
 bool turnedOn;
 bool rerender = true;
@@ -43,8 +49,6 @@ void writeOnfile (std::string text) {
     myfile << filetext;
     myfile.close();
 }
-
-
 
 void my_handler(int s){
     writeOnfile("terminated by user.\n");
@@ -113,11 +117,12 @@ void drawWipers(int state, bool sprinklersOn){
 //Function animating wipers
 void wipe(short mode){
     short wiperState = 0;
+    finished = false;
 
-    if(mode == 1 || mode == 2 || mode == 6 || mode == 7) stopWiping = true;
+    if(mode == frontOnce || mode == frontFluidOnce || mode == backOnce || mode == backFluidOnce) stopWiping = true;
 
     //Wipers with sprinklers
-    if(mode == 2 || mode == 3 || mode == 7 || mode == 8){
+    if(mode == frontFluidOnce || mode == frontFluid || mode == backFluidOnce || mode == backFluid){
         int count = 0;
         int sprinklersCount = 0;
         for(;;){
@@ -138,8 +143,8 @@ void wipe(short mode){
 
             drawWipers(0, true);
 
-            if(mode >= 0 && mode <= 4) std::cout << "              front\n\n";
-            else if(mode >= 5 && mode <= 9) std::cout << "              back\n\n";
+            if(mode >= frontOn && mode <= frontOff) std::cout << "              front\n\n";
+            else if(mode >= backOn && mode <= backOff) std::cout << "              back\n\n";
             
             std::cout.flush();
             usleep(125000);
@@ -152,8 +157,8 @@ void wipe(short mode){
         std::cout<< u8"\033[2J\033[1;1H";
         drawWipers(wiperState, false);
 
-        if(mode >= 0 && mode <= 4) std::cout << "              front\n\n";
-        else if(mode >= 5 && mode <= 9) std::cout << "              back\n\n";
+        if(mode >= frontOn && mode <= frontOff) std::cout << "              front\n\n";
+        else if(mode >= backOn && mode <= backOff) std::cout << "              back\n\n";
  
         wiperState++;
         std::cout.flush();
@@ -163,8 +168,8 @@ void wipe(short mode){
                 std::cout<< u8"\033[2J\033[1;1H";
                 drawWipers(backwardRun, false);
 
-                if(mode >= 0 && mode <= 4) std::cout << "              front\n\n";
-                else if(mode >= 5 && mode <= 9) std::cout << "              back\n\n";
+                if(mode >= frontOn && mode <= frontOff) std::cout << "              front\n\n";
+        else if(mode >= backOn && mode <= backOff) std::cout << "              back\n\n";
 
                 std::cout.flush();
                 usleep(500000);
@@ -172,8 +177,11 @@ void wipe(short mode){
             wiperState = -1;
            
         }  
-        if(wiperState == -1) return; 
 
+        if(wiperState == -1){
+            finished = true;
+            return; 
+        }
     }
 }
 
@@ -187,52 +195,52 @@ void chooseMode(){
             std::cout<< u8"\033[2J\033[1;1H";
             switch(mode){
                 //Wipe front continuously 
-                case 0:
-                    wipe(0);
+                case frontOn:
+                    wipe(frontOn);
                     return;
 
                 //Wipe front once
-                case 1:
-                    wipe(1);
+                case frontOnce:
+                    wipe(frontOnce);
                     return;
 
                 //Wipe front once with fluid
-                case 2:
-                    wipe(2);
+                case frontFluidOnce:
+                    wipe(frontFluidOnce);
                     return;
                 
                 //Wipe front continuously with fluid
-                case 3:
-                    wipe(3);
+                case frontFluid:
+                    wipe(frontFluid);
                     return;
 
                 //Stop wiping front
-                case 4:
+                case frontOff:
                     stopWiping = true;
                     return;
 
                 //Wipe back continuously 
-                case 5:
-                    wipe(5);
+                case backOn:
+                    wipe(backOn);
                     return;
 
                 //Wipe back once
-                case 6:
-                    wipe(6);
+                case backOnce:
+                    wipe(backOnce);
                     return;
 
                 //Wipe back once with fluid
-                case 7:
-                    wipe(7);
+                case backFluidOnce:
+                    wipe(backFluidOnce);
                     return;
 
                 //Wipe back continuously with fluid
-                case 8: 
-                    wipe(8);
+                case backFluid: 
+                    wipe(backFluid);
                     return;
         
                 //Stop wiping back
-                case 9:
+                case backOff:
                     stopWiping = true;
                     return;
                 default:
@@ -245,6 +253,13 @@ void chooseMode(){
 }
 
 int main(){
+
+    infoFromBrokerMap.insert({"on", on});
+    infoFromBrokerMap.insert({"off", off});
+    infoFromBrokerMap.insert({"once", once});
+    infoFromBrokerMap.insert({"fluid", fluid});
+    infoFromBrokerMap.insert({"fluid_once", fluid_once});
+
     std::string previousText;
     
     homeDir = getenv("HOME"); 
@@ -253,7 +268,8 @@ int main(){
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
     sigaction(SIGINT, &sigIntHandler, NULL);
-
+    
+    
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
 	auto connOpts = mqtt::connect_options_builder()
@@ -297,64 +313,79 @@ int main(){
                     previousText = text;
 
                     if(msg->get_topic() == "/car/wipers/front"){
-                        if(option == "on"){
-                            stopWiping = false;
-                            turnedOn = true;
-                            mode = 0;
-                        }
-                        else if(option == "off"){ 
-                            stopWiping = true;
-                            turnedOn = true;
-                            mode = 4;
-                        }
-                        else if(option == "once"){
-                            turnedOn = true;
-                            mode = 1; 
-                        }
-                        else if(option == "fluid"){
-                            stopWiping = false;
-                            turnedOn = true;
-                            mode = 3;
-                        }
-                        else if(option == "fluid_once"){ 
-                            turnedOn = true;
-                            mode = 2;
+                        switch(infoFromBrokerMap[option]){
+                            case on:
+                                stopWiping = false;
+                                turnedOn = true;
+                                mode = frontOn;
+                                break;
+
+                            case off:
+                                stopWiping = true;
+                                turnedOn = true;
+                                mode = frontOff;
+                                break;
+
+                            case once:
+                                turnedOn = true;
+                                mode = frontOnce;
+                                break;
+
+                            case fluid:
+                                stopWiping = false;
+                                turnedOn = true;
+                                mode = frontFluid;
+                                break;
+
+                            case fluid_once:
+                                turnedOn = true;
+                                mode = frontFluidOnce;
+                                break;
                         }
                     }
                     else if(msg->get_topic() == "/car/wipers/back"){
-                        if(option == "on"){
-                            turnedOn = true;
-                            stopWiping = false;
-                            mode = 5;
-                        }
-                        else if(option == "off"){ 
-                            turnedOn = true;
-                            stopWiping = true;
-                            mode = 9;
-                        }
-                        else if(option == "once"){
-                            turnedOn = true;
-                            mode = 6; 
-                        }
-                        else if(option == "fluid"){
-                            turnedOn = true;
-                            stopWiping = false;
-                            mode = 8;
-                        }
-                        else if(option == "fluid_once"){ 
-                            turnedOn = true;
-                            mode = 7;
+                        switch(infoFromBrokerMap[option]){
+                            case on:
+                                stopWiping = false;
+                                turnedOn = true;
+                                mode = backOn;
+                                break;
+
+                            case off:
+                                stopWiping = true;
+                                turnedOn = true;
+                                mode = backOff;
+                                break;
+
+                            case once:
+                                turnedOn = true;
+                                mode = backOnce;
+                                break;
+
+                            case fluid:
+                                stopWiping = false;
+                                turnedOn = true;
+                                mode = backFluid;
+                                break;
+
+                            case fluid_once:
+                                turnedOn = true;
+                                mode = backFluidOnce;
+                                break;
                         }
                     }
 
                     mqtt::const_message_ptr msgNew;
 
                     if(cli.try_consume_message(&msgNew)){
+
                         msg = msgNew;
                         stopWiping = false;
                         continue;
                     }
-                    if(!stopWiping) chooseMode();    
+                    
+                    if(!stopWiping) chooseMode();
+  
                 }
             } 
 		}
