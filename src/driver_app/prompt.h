@@ -16,6 +16,7 @@ wipe_w_fluid <front or back> <on or once> \t\t-> turn on the specified wipers an
 wipe_off <front or back> \t\t-> turn off the specified wipers\n\
 run <file>\t\t-> run the scenario file\n\
 record <file>\t\t-> record the scenario to a file\n\
+delay <milliseconds>\t\t-> sets delay beetween actions\n\
 stop_rec\t\t-> stop recording the scenario\n\
 "
 
