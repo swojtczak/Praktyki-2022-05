@@ -20,32 +20,30 @@ delay <milliseconds>\t\t-> sets delay beetween actions\n\
 stop_rec\t\t-> stop recording the scenario\n\
 "
 
-
 struct command {
     std::string command;
     int len;
 };
 
 const struct command command_list[] = {
-    {"exit",        1},
-    {"help",        1},
-    {"open",        3},
-    {"close",       3},
-    {"turn_on",     3},
-    {"turn_off",    3},
-    {"wipe",        3},
+    {"exit", 1},
+    {"help", 1},
+    {"open", 3},
+    {"close", 3},
+    {"turn_on", 3},
+    {"turn_off", 3},
+    {"wipe", 3},
     {"wipe_w_fluid", 3},
-    {"wipe_off",    2},
-    {"stop",        3},
-    {"delay",       2},
-    {"run",         2},
-    {"record",      2},
-    {"stop_rec",        1},
+    {"wipe_off", 2},
+    {"stop", 3},
+    {"delay", 2},
+    {"run", 2},
+    {"record", 2},
+    {"stop_rec", 1},
 };
-
 
 void repl_loop(bool debug);
 int check_operator(std::string op, bool silentRun);
 std::vector<std::string> split_line(char *line);
 bool execute_instruction(int instruction, std::vector<std::string> args);
-void recordAction(char* command, std::string fileName);
+void recordAction(char *command, std::string fileName);
