@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <readline/chardefs.h>
 #include <readline/history.h>
 #include <readline/readline.h>
@@ -27,10 +28,46 @@ std::ofstream scenarioFile;
 bool commandExecuted;
 
 const std::string ADDRESS{"tcp://localhost:1883"};
-const std::string CLIENT_ID{"driver_app"};
+std::string CLIENT_ID;
 const int QOS = 1;
 mqtt::connect_options connOpts;
 mqtt::client cli(ADDRESS, CLIENT_ID);
+
+namespace uuid
+{
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_int_distribution<> dis(0, 15);
+static std::uniform_int_distribution<> dis2(8, 11);
+
+std::string generate_uuid_v4()
+{
+    std::stringstream ss;
+    int i;
+    ss << std::hex;
+    for (i = 0; i < 8; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 4; i++) {
+        ss << dis(gen);
+    }
+    ss << "-4";
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    ss << dis2(gen);
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 12; i++) {
+        ss << dis(gen);
+    };
+    return ss.str();
+}
+} // namespace uuid
 
 void writeOnfile(std::string text)
 {
@@ -88,6 +125,8 @@ void my_handler(int s)
 
 void repl_loop(bool debug)
 {
+    CLIENT_ID = uuid::generate_uuid_v4();
+    printf("Client ID: %s\n", CLIENT_ID.c_str());
     homeDir = getenv("HOME");
     struct sigaction sigIntHandler;
     sigIntHandler.sa_handler = my_handler;
