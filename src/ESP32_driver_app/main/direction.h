@@ -15,6 +15,4 @@
 #define INDIALARMBTN 21
 
 void configDirectionPins();
-static void IRAM_ATTR left_isr_handler(void *args);
-static void IRAM_ATTR right_isr_handler(void *args);
-void readDirection(void *arg);
+void readDirection(void * arg);

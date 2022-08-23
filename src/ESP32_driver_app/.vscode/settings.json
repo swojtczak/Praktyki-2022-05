@@ -14,7 +14,8 @@
         "timer.h": "c",
         "*.inc": "c",
         "direction.h": "c",
-        "adc.h": "c"
+        "adc.h": "c",
+        "window.h": "c"
     },
     "idf.flashType": "UART",
     "idf.portWin": "COM4"
