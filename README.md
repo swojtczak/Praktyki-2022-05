@@ -41,9 +41,6 @@ Autox works by using the CAN BUS to take user input and pass it down to the indi
 
 [esp32]: https://img.shields.io/badge/ESP32-lightgrey
 
-## Getting started
-
-
 ## Build instructions :wrench:
 
 ### Linux:
