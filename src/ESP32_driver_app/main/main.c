@@ -26,6 +26,7 @@
 #include "mqtt_client.h"
 
 #include "direction.h"
+#include "window.h"
 
 static const char *TAG = "ESP32_DRIVER";
 
@@ -152,9 +153,9 @@ void readAnalog(void * arg)
             adc_reading /= NO_OF_SAMPLES;
 
             sprintf(payload, "%d", toAngle(adc_reading));
-            esp_mqtt_client_publish(client, "/car/wheel/angle", payload, 0, 0, 0);
+            //esp_mqtt_client_publish(client, "/car/wheel/angle", payload, 0, 0, 0);
 
-            printf("wyslano %d\n", toAngle(adc_reading));
+            //printf("wyslano %d\n", toAngle(adc_reading));
         }
     }
 
@@ -168,6 +169,7 @@ void app_main(void)
 
     xTaskCreate(readAnalog, "ReadAnalog", 1024 * 10, NULL, 1, NULL);
     xTaskCreate(readDirection, "ReadDirection", 1024 * 10, NULL, 1, NULL);
+    xTaskCreate(readWindow, "ReadWindow", 1024 * 10, NULL, 1, NULL);
 
     adc1_config_width( ADC_WIDTH_BIT_12 );
     adc1_config_channel_atten( POTPIN, ADC_ATTEN_DB_0);

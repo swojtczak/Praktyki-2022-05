@@ -8,7 +8,7 @@ static SemaphoreHandle_t s_direction_sem;
 extern esp_mqtt_client_handle_t client;
 extern bool connected;
 
-uint8_t debounce = 0;
+uint8_t direction_debounce = 0;
 
 static void IRAM_ATTR lever_isr_handler(void * args)
 {
@@ -17,15 +17,12 @@ static void IRAM_ATTR lever_isr_handler(void * args)
 
 static void IRAM_ATTR hazard_isr_handler(void * args)
 {
-    if (debounce == 0) xSemaphoreGiveFromISR(s_direction_sem, NULL);  
-    debounce++;
+    if (direction_debounce == 0) xSemaphoreGiveFromISR(s_direction_sem, NULL);  
+    direction_debounce++;
 }
 
 void configDirectionPins()
 {
-    s_direction_sem = xSemaphoreCreateBinary();
-    if (s_direction_sem == NULL)  printf("Binary semaphore can not be created");
-
     gpio_pad_select_gpio(INDILEFTBTN);
     gpio_pad_select_gpio(INDIRIGHTBTN);
     gpio_pad_select_gpio(INDIALARMBTN);
@@ -51,6 +48,13 @@ void configDirectionPins()
 
 void readDirection(void * arg)
 {
+    s_direction_sem = xSemaphoreCreateBinary();
+    if (s_direction_sem == NULL)  
+    {
+        printf("Binary semaphore can not be created");
+        return;
+    }
+
     configDirectionPins();
     bool hazard = false;
 
@@ -60,7 +64,7 @@ void readDirection(void * arg)
         {   
             
             vTaskDelay(20);
-            if (debounce > 0)
+            if (direction_debounce > 0)
             {
                 if (hazard)
                 {
@@ -72,7 +76,7 @@ void readDirection(void * arg)
                 }
 
                 hazard = !hazard;
-                debounce = 0;
+                direction_debounce = 0;
                 
                 continue;
             }
