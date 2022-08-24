@@ -8,7 +8,6 @@
 #include <iomanip>
 #include <iostream>
 #include <random>
-#include <readline/chardefs.h>
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <signal.h>
@@ -68,6 +67,31 @@ std::string generate_uuid_v4()
     return ss.str();
 }
 } // namespace uuid
+
+char **command_completion(const char *text, int start, int end)
+{
+    rl_attempted_completion_over = 1;
+    return rl_completion_matches(text, command_generator);
+}
+
+char *command_generator(const char *text, int state)
+{
+    static int index, len;
+    char *command;
+
+    if (!state) {
+        index = 0;
+        len   = strlen(text);
+    }
+
+    while (index < sizeof(command_list) / sizeof(struct command)) {
+        command = strdup(command_list[index++].command.c_str());
+        if (strncmp(command, text, len) == 0)
+            return command;
+    }
+
+    return NULL;
+}
 
 void writeOnfile(std::string text)
 {
@@ -133,6 +157,8 @@ void repl_loop(bool debug)
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
     sigaction(SIGINT, &sigIntHandler, NULL);
+
+    rl_attempted_completion_function = command_completion;
 
     connOpts.set_keep_alive_interval(20);
     connOpts.set_clean_session(true);
@@ -225,6 +251,9 @@ std::vector<std::string> split_line(char *line)
         end   = in.find(" ", start);
     }
     ret.push_back(in.substr(start, end - start));
+
+    while (ret[ret.size() - 1] == "")
+        ret.pop_back();
 
     return ret;
 }
