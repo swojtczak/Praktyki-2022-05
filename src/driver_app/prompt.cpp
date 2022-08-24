@@ -81,15 +81,10 @@ char *command_generator(const char *text, int state)
 
     if (!state) {
         index = 0;
-        len = strlen(text);
+        len   = strlen(text);
     }
 
-    // while ((command = strdup(command_list[index++].command.c_str()))) {
-    //     if (strncmp(command, text, len) == 0)
-    //         return command;
-    // }
-
-    while (index < sizeof(command_list)/sizeof(struct command)) {
+    while (index < sizeof(command_list) / sizeof(struct command)) {
         command = strdup(command_list[index++].command.c_str());
         if (strncmp(command, text, len) == 0)
             return command;
