@@ -29,13 +29,16 @@ enum modes { frontOn,
              backOnce,
              backFluidOnce,
              backFluid,
-             backOff };
+             backOff 
+            };
 
 enum infoFromBroker { on,
                       off,
                       once,
                       fluid,
-                      fluid_once };
+                      fluid_once 
+                    };
+                    
 std::map<std::string, infoFromBroker> infoFromBrokerMap;
 
 bool stopWiping, finished;
@@ -43,7 +46,7 @@ int mode = 0;
 bool turnedOn;
 bool rerender = true;
 
-void writeOnfile(std::string text)
+/*void writeOnfile(std::string text)
 {
     std::string path = homeDir + "/.local/share/autox.log";
 
@@ -67,8 +70,9 @@ void my_handler(int s)
 {
     writeOnfile("terminated by user.\n");
     exit(1);
-}
+}*/
 
+//Function drawing wipers depending on state passed as argument
 void drawWipers(int state, bool sprinklersOn)
 {
     int lenghtOfWipers = 6;
@@ -216,6 +220,7 @@ void wipe(short mode)
     }
 }
 
+//Function executing wipe() function in desired mode
 void chooseMode()
 {
     if (!turnedOn && rerender) {
@@ -292,14 +297,14 @@ int main()
     infoFromBrokerMap.insert({"fluid", fluid});
     infoFromBrokerMap.insert({"fluid_once", fluid_once});
 
-    std::string previousText;
+    /*std::string previousText;
 
     homeDir = getenv("HOME");
     struct sigaction sigIntHandler;
     sigIntHandler.sa_handler = my_handler;
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
-    sigaction(SIGINT, &sigIntHandler, NULL);
+    sigaction(SIGINT, &sigIntHandler, NULL);*/
 
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
@@ -319,7 +324,7 @@ int main()
             cli.subscribe(TOPIC_WB, QOS)->wait();
         }
 
-        writeOnfile("connected\n");
+        //writeOnfile("connected\n");
         chooseMode();
 
         mqtt::const_message_ptr msgPrev;
@@ -336,11 +341,11 @@ int main()
                     std::string option = msg->to_string();
                     std::string text   = "received message: \"" + option + "\" on topic: " + msg->get_topic() + "\n";
 
-                    if (previousText != text) {
+                    /*if (previousText != text) {
                         writeOnfile(text);
                     }
 
-                    previousText = text;
+                    previousText = text;*/
 
                     if (msg->get_topic() == "/car/wipers/front") {
                         switch (infoFromBrokerMap[option]) {
@@ -426,13 +431,13 @@ int main()
             cli.stop_consuming();
             cli.disconnect()->wait();
             std::cout << "OK" << std::endl;
-            writeOnfile("disconnected from the server\n");
+            //writeOnfile("disconnected from the server\n");
         } else {
             std::cout << "\nClient was disconnected" << std::endl;
         }
     } catch (const mqtt::exception &exc) {
         std::cerr << "\n  " << exc << std::endl;
-        writeOnfile("crashed unexpectedly.\n");
+        //writeOnfile("crashed unexpectedly.\n");
         return 1;
     }
 }
