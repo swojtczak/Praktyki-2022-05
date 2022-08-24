@@ -10,14 +10,14 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
-#define WINLFUP    23
-#define WINLFDOWN  22
-#define WINRFUP    25 
-#define WINRFDOWN  26
-#define WINLBUP    0
-#define WINLBDOWN  0
-#define WINRBUP    0 
-#define WINRBDOWN  0
+#define WINLFUP    25
+#define WINLFDOWN  26
+#define WINRFUP    13 
+#define WINRFDOWN  27
+#define WINLBUP    22
+#define WINLBDOWN  23
+#define WINRBUP    32 
+#define WINRBDOWN  14
 
 void configWindowPins();
 void readWindow(void *arg);

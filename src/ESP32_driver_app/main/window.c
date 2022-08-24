@@ -32,21 +32,37 @@ void configWindowPins()
     gpio_pad_select_gpio(WINLFDOWN);
     gpio_pad_select_gpio(WINRFUP);
     gpio_pad_select_gpio(WINRFDOWN);
+    gpio_pad_select_gpio(WINLBUP);
+    gpio_pad_select_gpio(WINLBDOWN);
+    gpio_pad_select_gpio(WINRBUP);
+    gpio_pad_select_gpio(WINRBDOWN);
 
     gpio_set_direction(WINLFUP, GPIO_MODE_INPUT);
     gpio_set_direction(WINLFDOWN, GPIO_MODE_INPUT);
     gpio_set_direction(WINRFUP, GPIO_MODE_INPUT);
     gpio_set_direction(WINRFDOWN, GPIO_MODE_INPUT);
+    gpio_set_direction(WINLBUP, GPIO_MODE_INPUT);
+    gpio_set_direction(WINLBDOWN, GPIO_MODE_INPUT);
+    gpio_set_direction(WINRBUP, GPIO_MODE_INPUT);
+    gpio_set_direction(WINRBDOWN, GPIO_MODE_INPUT);
 
     gpio_pullup_en(WINLFUP);
     gpio_pullup_en(WINLFDOWN);
-    gpio_pullup_en(WINRFUP);
+    //gpio_pullup_en(WINRFUP);
     gpio_pullup_en(WINRFDOWN);
+    gpio_pullup_en(WINLBUP);
+    gpio_pullup_en(WINLBDOWN);
+    gpio_pullup_en(WINRBUP);
+    gpio_pullup_en(WINRBDOWN);
 
     gpio_set_intr_type(WINLFUP, GPIO_INTR_ANYEDGE);
     gpio_set_intr_type(WINLFDOWN, GPIO_INTR_ANYEDGE);
     gpio_set_intr_type(WINRFUP, GPIO_INTR_ANYEDGE);
     gpio_set_intr_type(WINRFDOWN, GPIO_INTR_ANYEDGE);
+    gpio_set_intr_type(WINLBUP, GPIO_INTR_ANYEDGE);
+    gpio_set_intr_type(WINLBDOWN, GPIO_INTR_ANYEDGE);
+    gpio_set_intr_type(WINRBUP, GPIO_INTR_ANYEDGE);
+    gpio_set_intr_type(WINRBDOWN, GPIO_INTR_ANYEDGE);
 
     gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
 
@@ -54,6 +70,10 @@ void configWindowPins()
     gpio_isr_handler_add(WINLFDOWN, windows_isr_handler, &windows[0]);
     gpio_isr_handler_add(WINRFUP, windows_isr_handler, &windows[1]);
     gpio_isr_handler_add(WINRFDOWN, windows_isr_handler, &windows[1]);
+    gpio_isr_handler_add(WINLBUP, windows_isr_handler, &windows[2]);
+    gpio_isr_handler_add(WINLBDOWN, windows_isr_handler, &windows[2]);
+    gpio_isr_handler_add(WINRBUP, windows_isr_handler, &windows[3]);
+    gpio_isr_handler_add(WINRBDOWN, windows_isr_handler, &windows[3]);
 }
 
 void readWindow(void *arg)
