@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <mqtt/message.h>
 #include <signal.h>
 #include <sstream>
 #include <stdlib.h>
@@ -29,21 +30,29 @@ enum modes { frontOn,
              backOnce,
              backFluidOnce,
              backFluid,
-             backOff };
+             backOff 
+            };
 
 enum infoFromBroker { on,
                       off,
                       once,
                       fluid,
-                      fluid_once };
+                      fluid_once 
+                    };
+                    
 std::map<std::string, infoFromBroker> infoFromBrokerMap;
 
-bool stopWiping, finished;
+mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
+
+bool stopWiping;
 int mode = 0;
 bool turnedOn;
 bool rerender = true;
+bool blockLoop;
 
-void writeOnfile(std::string text)
+std::string storedComm, storedTopic;
+
+/*void writeOnfile(std::string text)
 {
     std::string path = homeDir + "/.local/share/autox.log";
 
@@ -67,8 +76,9 @@ void my_handler(int s)
 {
     writeOnfile("terminated by user.\n");
     exit(1);
-}
+}*/
 
+//Function drawing wipers depending on state passed as argument
 void drawWipers(int state, bool sprinklersOn)
 {
     int lenghtOfWipers = 6;
@@ -140,10 +150,12 @@ void drawWipers(int state, bool sprinklersOn)
 void wipe(short mode)
 {
     short wiperState = 0;
-    finished         = false;
 
-    if (mode == frontOnce || mode == frontFluidOnce || mode == backOnce || mode == backFluidOnce)
+    if (mode == frontOnce || mode == frontFluidOnce || mode == backOnce || mode == backFluidOnce){
         stopWiping = true;
+        blockLoop = true;
+    }
+    else blockLoop = false;
 
     //Wipers with sprinklers
     if (mode == frontFluidOnce || mode == frontFluid || mode == backFluidOnce || mode == backFluid) {
@@ -209,13 +221,23 @@ void wipe(short mode)
             wiperState = -1;
         }
 
-        if (wiperState == -1) {
-            finished = true;
+        if (wiperState == -1 || mode == frontOff || mode == backOff) {
+            mqtt::const_message_ptr msg;
+
+            while(cli.try_consume_message(&msg)){
+                if(msg->to_string() != "once" && msg->to_string() != "fluid_once"){
+                    storedComm = msg->to_string();
+                    storedTopic = msg->get_topic();
+                    break;
+                }
+            };
+
             return;
         }
     }
 }
 
+//Function executing wipe() function in desired mode
 void chooseMode()
 {
     if (!turnedOn && rerender) {
@@ -248,6 +270,7 @@ void chooseMode()
 
             //Stop wiping front
             case frontOff:
+                wipe(frontOff);
                 stopWiping = true;
                 return;
 
@@ -273,6 +296,7 @@ void chooseMode()
 
             //Stop wiping back
             case backOff:
+                wipe(backOff);
                 stopWiping = true;
                 return;
             default:
@@ -292,16 +316,14 @@ int main()
     infoFromBrokerMap.insert({"fluid", fluid});
     infoFromBrokerMap.insert({"fluid_once", fluid_once});
 
-    std::string previousText;
+    /*std::string previousText;
 
     homeDir = getenv("HOME");
     struct sigaction sigIntHandler;
     sigIntHandler.sa_handler = my_handler;
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
-    sigaction(SIGINT, &sigIntHandler, NULL);
-
-    mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
+    sigaction(SIGINT, &sigIntHandler, NULL);*/
 
     auto connOpts = mqtt::connect_options_builder()
                         .clean_session(true)
@@ -319,30 +341,44 @@ int main()
             cli.subscribe(TOPIC_WB, QOS)->wait();
         }
 
-        writeOnfile("connected\n");
+        //writeOnfile("connected\n");
         chooseMode();
-
-        mqtt::const_message_ptr msgPrev;
-
+        
         while (true) {
             mqtt::const_message_ptr msg;
+            std::string prevTopic, prevComm;
 
-            if (cli.try_consume_message(&msg)) {
+            if (cli.try_consume_message(&msg) || !storedComm.empty()) {
                 for (;;) {
+                    
 
                     if (msg == nullptr)
                         break;
 
-                    std::string option = msg->to_string();
-                    std::string text   = "received message: \"" + option + "\" on topic: " + msg->get_topic() + "\n";
+                    std::string option;
+                    std::string topic;
 
-                    if (previousText != text) {
+                    if(storedComm.empty()){
+                        option = msg->to_string();
+                        topic = msg->get_topic();
+                    }
+
+                    if (!storedComm.empty()){
+                        option = storedComm;
+                        topic = storedTopic;
+                        
+                    }
+                    
+
+                    //std::string text   = "received message: \"" + option + "\" on topic: " + msg->get_topic() + "\n";
+
+                    /*if (previousText != text) {
                         writeOnfile(text);
                     }
 
-                    previousText = text;
+                    previousText = text;*/
 
-                    if (msg->get_topic() == "/car/wipers/front") {
+                    if (topic == "/car/wipers/front") {
                         switch (infoFromBrokerMap[option]) {
                             case on:
                                 stopWiping = false;
@@ -372,7 +408,7 @@ int main()
                                 mode     = frontFluidOnce;
                                 break;
                         }
-                    } else if (msg->get_topic() == "/car/wipers/back") {
+                    } else if (topic == "/car/wipers/back") {
                         switch (infoFromBrokerMap[option]) {
                             case on:
                                 stopWiping = false;
@@ -404,6 +440,9 @@ int main()
                         }
                     }
 
+                    storedTopic.clear();
+                    storedComm.clear();
+
                     mqtt::const_message_ptr msgNew;
 
                     if (cli.try_consume_message(&msgNew)) {
@@ -413,26 +452,39 @@ int main()
                         continue;
                     }
 
-                    if (!stopWiping)
+                    if (!stopWiping){
                         chooseMode();
+                    }
+                    else{
+                        if(mode == frontOff || mode == backOff){
+                            mqtt::const_message_ptr msgTmp;
+                            msg = msgTmp;
+                            continue;
+                        }
+                        
+                        if(!blockLoop){ 
+                            stopWiping = false;
+                        }
+                    }
+
                 }
             }
         }
 
         if (cli.is_connected()) {
-            std::cout << "\nShutting down and disconnecting from the MQTT server..." << std::flush;
+            std::cout << "\nShuttinga down and disconnecting from the MQTT server..." << std::flush;
             cli.unsubscribe(TOPIC_WF)->wait();
             cli.unsubscribe(TOPIC_WB)->wait();
             cli.stop_consuming();
             cli.disconnect()->wait();
             std::cout << "OK" << std::endl;
-            writeOnfile("disconnected from the server\n");
+            //writeOnfile("disconnected from the server\n");
         } else {
             std::cout << "\nClient was disconnected" << std::endl;
         }
     } catch (const mqtt::exception &exc) {
         std::cerr << "\n  " << exc << std::endl;
-        writeOnfile("crashed unexpectedly.\n");
+        //writeOnfile("crashed unexpectedly.\n");
         return 1;
     }
 }
