@@ -23,6 +23,7 @@
 #include "direction.h"
 #include "window.h"
 #include "wheel.h"
+#include "wipers.h"
 
 static const char *TAG = "ESP32_driver_main";
 
@@ -101,9 +102,12 @@ static void mqtt_app_start(void)
 
 void app_main(void)
 {
-    xTaskCreate(readAnalog, "ReadAnalog", 1024 * 10, NULL, 1, NULL);
-    xTaskCreate(readDirection, "ReadDirection", 1024 * 10, NULL, 1, NULL);
-    xTaskCreate(readWindow, "ReadWindow", 1024 * 10, NULL, 1, NULL);
+    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
+
+    xTaskCreate(readAnalog, "ReadAnalog", 1024 * 10, NULL, 10, NULL);
+    xTaskCreate(readDirection, "ReadDirection", 1024 * 10, NULL, 10, NULL);
+    xTaskCreate(readWindow, "ReadWindow", 1024 * 10, NULL, 10, NULL);
+    xTaskCreate(readWiper, "ReadWipers", 1024 * 10, NULL, 10, NULL);
 
     gpio_pad_select_gpio(OKLED);
     gpio_set_direction(OKLED, GPIO_MODE_OUTPUT);

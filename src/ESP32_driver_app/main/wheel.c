@@ -41,7 +41,7 @@ void readAnalog(void * arg)
     if (s_timer_sem == NULL)  
     {
         printf("Binary semaphore can not be created");
-        return;
+        vTaskDelete(NULL);
     }
 
     adc1_config_width(ADC_WIDTH_BIT_12);
