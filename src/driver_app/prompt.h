@@ -49,3 +49,5 @@ int check_operator(std::string op, bool silentRun);
 std::vector<std::string> split_line(char *line);
 bool execute_instruction(int instruction, std::vector<std::string> args);
 void recordAction(char *command, std::string fileName);
+char *command_generator(const char *text, int state);
+char **command_completion(const char *text, int start, int end);
