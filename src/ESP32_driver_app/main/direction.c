@@ -39,8 +39,6 @@ void configDirectionPins()
     gpio_set_intr_type(INDIRIGHTBTN, GPIO_INTR_ANYEDGE);
     gpio_set_intr_type(INDIALARMBTN, GPIO_INTR_NEGEDGE);
 
-    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
-
     gpio_isr_handler_add(INDILEFTBTN, lever_isr_handler, NULL);
     gpio_isr_handler_add(INDIRIGHTBTN, lever_isr_handler, NULL);
     gpio_isr_handler_add(INDIALARMBTN, hazard_isr_handler, NULL);
@@ -52,7 +50,7 @@ void readDirection(void * arg)
     if (s_direction_sem == NULL)  
     {
         printf("Binary semaphore can not be created");
-        return;
+        vTaskDelete(NULL);
     }
 
     configDirectionPins();

@@ -64,8 +64,6 @@ void configWindowPins()
     gpio_set_intr_type(WINRBUP, GPIO_INTR_ANYEDGE);
     gpio_set_intr_type(WINRBDOWN, GPIO_INTR_ANYEDGE);
 
-    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
-
     gpio_isr_handler_add(WINLFUP, windows_isr_handler, &windows[0]);
     gpio_isr_handler_add(WINLFDOWN, windows_isr_handler, &windows[0]);
     gpio_isr_handler_add(WINRFUP, windows_isr_handler, &windows[1]);
@@ -82,7 +80,7 @@ void readWindow(void *arg)
     if (s_window_sem == NULL)  
     {
         ESP_LOGE(TAG, "Binary semaphore can not be created");
-        return;
+        vTaskDelete(NULL);
     }
 
     configWindowPins();
