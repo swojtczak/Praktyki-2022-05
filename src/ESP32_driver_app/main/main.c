@@ -27,6 +27,7 @@
 static const char *TAG = "ESP32_driver_main";
 
 #define CONFIG_BROKER_URL "mqtt://192.168.1.79:1883"
+#define OKLED 12
 
 esp_mqtt_client_handle_t client;
 bool connected = false;
@@ -49,12 +50,14 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 
         connected = true;
         ESP_LOGI(TAG, "ESP connected");
+        gpio_set_level(OKLED, true);
 
         break;
     case MQTT_EVENT_DISCONNECTED:
 
         ESP_LOGI(TAG, "ESP disconected");
         connected = false;
+        gpio_set_level(OKLED, false);
         esp_mqtt_client_reconnect(client);
 
         break;
@@ -101,6 +104,9 @@ void app_main(void)
     xTaskCreate(readAnalog, "ReadAnalog", 1024 * 10, NULL, 1, NULL);
     xTaskCreate(readDirection, "ReadDirection", 1024 * 10, NULL, 1, NULL);
     xTaskCreate(readWindow, "ReadWindow", 1024 * 10, NULL, 1, NULL);
+
+    gpio_pad_select_gpio(OKLED);
+    gpio_set_direction(OKLED, GPIO_MODE_OUTPUT);
 
     esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("MQTT_CLIENT", ESP_LOG_VERBOSE);
