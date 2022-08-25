@@ -8,16 +8,13 @@
         "interface/ftdi/esp32_devkitj_v1.cfg",
         "target/esp32.cfg"
     ],
+    "idf.portWin": "COM4",
     "idf.pythonBinPathWin": "C:\\Espressif\\python_env\\idf4.4_py3.8_env\\Scripts\\python.exe",
     "idf.toolsPathWin": "C:\\Espressif",
-    "files.associations": {
-        "timer.h": "c",
-        "*.inc": "c",
-        "direction.h": "c",
-        "adc.h": "c",
-        "window.h": "c",
-        "lights.h": "c"
-    },
     "idf.flashType": "UART",
-    "idf.portWin": "COM4"
+    "files.associations": {
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
+    }
 }
