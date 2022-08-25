@@ -3,12 +3,6 @@
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <!-- interface-css-provider-path driver.css -->
-  <object class="GtkTextBuffer" id="textbufferDirection">
-    <property name="text" translatable="yes">Direction indicators:</property>
-  </object>
-  <object class="GtkTextBuffer" id="textbufferLog">
-    <property name="text" translatable="yes">									</property>
-  </object>
   <object class="GtkWindow" id="Window">
     <property name="can-focus">False</property>
     <property name="destroy-with-parent">True</property>
@@ -16,23 +10,6 @@
       <object class="GtkFixed" id="Fixed">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <child>
-          <object class="GtkTextView" id="textLog">
-            <property name="height-request">670</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="halign">end</property>
-            <property name="valign">end</property>
-            <property name="vexpand">True</property>
-            <property name="hscroll-policy">natural</property>
-            <property name="vscroll-policy">natural</property>
-            <property name="buffer">textbufferLog</property>
-            <property name="monospace">True</property>
-          </object>
-          <packing>
-            <property name="x">700</property>
-          </packing>
-        </child>
         <child>
           <!-- n-columns=2 n-rows=4 -->
           <object class="GtkGrid">
@@ -81,7 +58,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="FrontLeftDown">
+              <object class="GtkButton" id="frontLeftDown">
                 <property name="label">gtk-go-down</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
@@ -355,18 +332,103 @@
             <property name="y">255</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkFrame">
+            <property name="width-request">50</property>
+            <property name="height-request">40</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label-xalign">0</property>
+            <property name="shadow-type">none</property>
+            <child>
+              <object class="GtkAlignment">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="left-padding">12</property>
+                <child>
+                  <object class="GtkButton" id="wipeOnce">
+                    <property name="label" translatable="yes">once</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label_item">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="x">625</property>
+            <property name="y">145</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label-xalign">0</property>
+            <property name="shadow-type">none</property>
+            <child>
+              <object class="GtkAlignment">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="left-padding">12</property>
+                <child>
+                  <object class="GtkButton" id="wipeFluidOnce">
+                    <property name="label" translatable="yes">once</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label_item">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="x">625</property>
+            <property name="y">255</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame">
+            <property name="width-request">900</property>
+            <property name="height-request">670</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label-xalign">0</property>
+            <property name="shadow-type">none</property>
+            <child>
+              <object class="GtkAlignment">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="left-padding">12</property>
+                <child>
+                  <object class="GtkLabel" id="debugLog">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="wrap">True</property>
+                    <property name="track-visited-links">False</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label_item">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="x">700</property>
+          </packing>
+        </child>
       </object>
     </child>
     <style>
       <class name="background-color=&quot;pink&quot;;"/>
     </style>
-  </object>
-  <object class="GtkTextBuffer" id="textbufferWindows">
-    <property name="text" translatable="yes">Windows:</property>
-  </object>
-  <object class="GtkTextBuffer" id="textbufferWipers">
-    <property name="text" translatable="yes">	Front:
-Window:
-	 Back:</property>
   </object>
 </interface>
