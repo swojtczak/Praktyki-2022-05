@@ -9,6 +9,9 @@ GtkWidget	*window;
 GtkWidget	*wipe, *wipeFluid, *wipeOnce, *wipeFluidOnce, *left, *right, *hazard;
 GtkWidget	*frontLeftUp, *frontLeftDown, *frontRightUp, *frontRightDown, *backLeftUp, *backLeftDown, *backRightUp, *backRightDown;
 
+GdkDisplay *display;
+GdkScreen *screen;
+
 GtkLabel    *debugLog;
 
 const std::string ADDRESS {"tcp://localhost:1883"};
@@ -227,19 +230,24 @@ static void backRightDown_clicked(GtkWidget* widget, gpointer data)
 }
 
 int main(int argc, char *argv[]) {
-	gtk_init(&argc, &argv);
+	
+    gtk_init(&argc, &argv);
+    
+    display = gdk_display_get_default ();
+    screen = gdk_display_get_default_screen (display);
 
-	builder = gtk_builder_new_from_file ("../driver.glade");
- 
+
+    builder = gtk_builder_new_from_file("../driver.glade");
+	wipe = GTK_WIDGET(gtk_builder_get_object(builder, "wipe"));
+	wipeFluid = GTK_WIDGET(gtk_builder_get_object(builder, "wipeFluid"));
+	wipeOnce = GTK_WIDGET(gtk_builder_get_object(builder, "wipeOnce"));
+	wipeFluidOnce = GTK_WIDGET(gtk_builder_get_object(builder, "wipeFluidOnce"));
+
 	window = GTK_WIDGET(gtk_builder_get_object(builder, "Window"));
 
 	gtk_window_set_default_size(GTK_WINDOW(window), 290, 200);
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
-	wipe = GTK_WIDGET(gtk_builder_get_object(builder, "wipe"));
-	wipeFluid = GTK_WIDGET(gtk_builder_get_object(builder, "wipeFluid"));
-	wipeOnce = GTK_WIDGET(gtk_builder_get_object(builder, "wipeOnce"));
-	wipeFluidOnce = GTK_WIDGET(gtk_builder_get_object(builder, "wipeFluidOnce"));
 	
 	left = GTK_WIDGET(gtk_builder_get_object(builder, "left"));
 	right = GTK_WIDGET(gtk_builder_get_object(builder, "right"));
@@ -272,14 +280,26 @@ int main(int argc, char *argv[]) {
     g_signal_connect(backLeftDown, "clicked", G_CALLBACK(backLeftDown_clicked), NULL);
     g_signal_connect(backRightUp, "clicked", G_CALLBACK(backRightUp_clicked), NULL);
     g_signal_connect(backRightDown, "clicked", G_CALLBACK(backRightDown_clicked), NULL);
+
+
+    GtkCssProvider *provider;
+
+    provider = gtk_css_provider_new ();
+
+    gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    gtk_css_provider_load_from_data(provider, ".hazard{color: red;}", -1, NULL);
     
     debLog = getLastLines(line);
 
     gtk_label_set_text(debugLog, ( (gchar *) &debLog[0] ));
 	
-	gtk_widget_show(window);
+  	gtk_widget_show(window);
+    gtk_builder_connect_signals(builder, NULL);
 
-	gtk_main();
+    gtk_widget_show(window);
 
-	return EXIT_SUCCESS;
+    gtk_main();
+
+    return EXIT_SUCCESS;
 }

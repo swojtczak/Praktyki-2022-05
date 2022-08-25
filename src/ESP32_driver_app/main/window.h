@@ -10,9 +10,14 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
-#define INDILEFTBTN 5
-#define INDIRIGHTBTN 19
-#define INDIALARMBTN 21
+#define WINLFUP    25
+#define WINLFDOWN  26
+#define WINRFUP    13 
+#define WINRFDOWN  27
+#define WINLBUP    22
+#define WINLBDOWN  23
+#define WINRBUP    32 
+#define WINRBDOWN  14
 
-void configDirectionPins();
-void readDirection(void * arg);
+void configWindowPins();
+void readWindow(void *arg);

@@ -10,9 +10,13 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
-#define INDILEFTBTN 5
-#define INDIRIGHTBTN 19
-#define INDIALARMBTN 21
+#define WIPFB    17
+#define WIPFLU   16
+#define WIPONCE  34 
+#define WIPON    35
 
-void configDirectionPins();
-void readDirection(void * arg);
+#define LEDFLU   2
+#define LEDFB    18
+
+void configWipersPins();
+void readWiper(void *arg);

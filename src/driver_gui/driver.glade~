@@ -13,8 +13,6 @@
         <child>
           <!-- n-columns=2 n-rows=4 -->
           <object class="GtkGrid">
-            <property name="width-request">100</property>
-            <property name="height-request">80</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <child>
@@ -130,64 +128,6 @@
         </child>
         <child>
           <object class="GtkFrame">
-            <property name="width-request">140</property>
-            <property name="height-request">60</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label-xalign">0</property>
-            <property name="shadow-type">none</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">---------</property>
-                <attributes>
-                  <attribute name="foreground" value="#000000000000"/>
-                  <attribute name="background" value="#000000000000"/>
-                  <attribute name="size" value="39936"/>
-                </attributes>
-              </object>
-            </child>
-            <child type="label_item">
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="x">190</property>
-            <property name="y">190</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame">
-            <property name="width-request">140</property>
-            <property name="height-request">60</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label-xalign">0</property>
-            <property name="shadow-type">none</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">---------</property>
-                <attributes>
-                  <attribute name="foreground" value="#000000000000"/>
-                  <attribute name="background" value="#000000000000"/>
-                  <attribute name="size" value="39936"/>
-                </attributes>
-              </object>
-            </child>
-            <child type="label_item">
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="x">460</property>
-            <property name="y">190</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame">
             <property name="width-request">50</property>
             <property name="height-request">40</property>
             <property name="visible">True</property>
@@ -214,8 +154,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">510</property>
-            <property name="y">145</property>
+            <property name="x">400</property>
+            <property name="y">100</property>
           </packing>
         </child>
         <child>
@@ -246,8 +186,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">510</property>
-            <property name="y">255</property>
+            <property name="x">400</property>
+            <property name="y">200</property>
           </packing>
         </child>
         <child>
@@ -265,7 +205,7 @@
                 <property name="left-padding">12</property>
                 <child>
                   <object class="GtkButton" id="hazard">
-                    <property name="label" translatable="yes">Hazard</property>
+                    <property name="label" translatable="yes">hazard</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -278,8 +218,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">340</property>
-            <property name="y">330</property>
+            <property name="x">75</property>
+            <property name="y">200</property>
           </packing>
         </child>
         <child>
@@ -303,8 +243,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">200</property>
-            <property name="y">145</property>
+            <property name="x">150</property>
+            <property name="y">100</property>
           </packing>
         </child>
         <child>
@@ -328,8 +268,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">200</property>
-            <property name="y">255</property>
+            <property name="x">50</property>
+            <property name="y">100</property>
           </packing>
         </child>
         <child>
@@ -360,8 +300,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">625</property>
-            <property name="y">145</property>
+            <property name="x">530</property>
+            <property name="y">100</property>
           </packing>
         </child>
         <child>
@@ -390,8 +330,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">625</property>
-            <property name="y">255</property>
+            <property name="x">530</property>
+            <property name="y">200</property>
           </packing>
         </child>
         <child>
