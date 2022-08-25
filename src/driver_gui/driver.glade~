@@ -81,7 +81,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="frontLeftDown">
+              <object class="GtkButton" id="FrontLeftDown">
                 <property name="label">gtk-go-down</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
