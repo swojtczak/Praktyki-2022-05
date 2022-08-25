@@ -1,12 +1,13 @@
-#include <string>
 #include "mqtt/client.h"
+#include <string>
 
-const std::string ADDRESS {"tcp://localhost:1883"};
+const std::string ADDRESS{"tcp://localhost:1883"};
 const int QOS = 1;
 
-int main(int argc, char* argv[]){
-    std::string TOPIC {"/car/wheel/angle"};
-    char* PAYLOAD2 = argv[1];
+int main(int argc, char *argv[])
+{
+    std::string TOPIC{"/car/wheel/angle"};
+    char *PAYLOAD2 = argv[1];
 
     // Create a client
 
@@ -31,12 +32,10 @@ int main(int argc, char* argv[]){
 
         // Now try with itemized publish.
 
-
         // Disconnect
 
         cli.disconnect();
-    }
-    catch (const mqtt::exception& exc) {
+    } catch (const mqtt::exception &exc) {
         std::cerr << "Error: " << exc.what() << " [" << exc.get_reason_code() << "]" << std::endl;
         return 1;
     }

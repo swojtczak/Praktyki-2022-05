@@ -74,10 +74,8 @@ GtkWidget	*frontLeftUp, *frontLeftDown, *frontRightUp, *frontRightDown, *backLef
 int main(int argc, char *argv[]) {
 	gtk_init(&argc, &argv);
 
-	builder = gtk_builder_new_from_file ("../driver.glade");
- 
-	window = GTK_WIDGET(gtk_builder_get_object(builder, "Window"));
 
+    builder = gtk_builder_new_from_file("../driver.glade");
 	wipe = GTK_WIDGET(gtk_builder_get_object(builder, "wipe"));
 	wipeFluid = GTK_WIDGET(gtk_builder_get_object(builder, "wipeFluid"));
 	
@@ -114,9 +112,12 @@ int main(int argc, char *argv[]) {
     g_signal_connect(backRightUp, "clicked", G_CALLBACK(backRightUp_clicked), NULL);
     g_signal_connect(backRightDown, "clicked", G_CALLBACK(backRightDown_clicked), NULL);
 	
-	gtk_widget_show(window);
+  	gtk_widget_show(window);
+    gtk_builder_connect_signals(builder, NULL);
 
-	gtk_main();
+    gtk_widget_show(window);
 
-	return EXIT_SUCCESS;
+    gtk_main();
+
+    return EXIT_SUCCESS;
 }

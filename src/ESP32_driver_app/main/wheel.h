@@ -5,14 +5,16 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
+#include "driver/timer.h"
 #include "driver/gpio.h"
+#include "driver/adc.h"
 
 #include "esp_log.h"
 #include "mqtt_client.h"
 
-#define INDILEFTBTN 5
-#define INDIRIGHTBTN 19
-#define INDIALARMBTN 21
+#define TIMER_DIVIDER 1000
+#define TIMER_ALARM 800
+#define NO_OF_SAMPLES 32
+#define POTPIN ADC1_CHANNEL_5
 
-void configDirectionPins();
-void readDirection(void * arg);
+void readAnalog(void *arg);
