@@ -281,6 +281,9 @@ int main(int argc, char *argv[]) {
     g_signal_connect(backRightUp, "clicked", G_CALLBACK(backRightUp_clicked), NULL);
     g_signal_connect(backRightDown, "clicked", G_CALLBACK(backRightDown_clicked), NULL);
 
+    GtkWidget *image = gtk_image_new_from_file ("../hazard.png");
+
+    gtk_button_set_image (GTK_BUTTON (hazard), image);
 
     GtkCssProvider *provider;
 

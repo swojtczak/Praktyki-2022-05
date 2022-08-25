@@ -205,10 +205,13 @@
                 <property name="left-padding">12</property>
                 <child>
                   <object class="GtkButton" id="hazard">
-                    <property name="label" translatable="yes">hazard</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="always-show-image">True</property>
+                    <style>
+                      <class name="hazard"/>
+                    </style>
                   </object>
                 </child>
               </object>
