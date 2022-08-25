@@ -17,19 +17,16 @@
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
 
+#include "driver/gpio.h"
 #include "esp_log.h"
 #include "mqtt_client.h"
-
-#include "direction.h"
-#include "window.h"
-#include "wheel.h"
-#include "wipers.h"
-#include "lights.h"
 
 static const char *TAG = "ESP32_driver_main";
 
 #define CONFIG_BROKER_URL "mqtt://192.168.1.79:1883"
 #define OKLED 12
+#define LONGLED 19
+#define NORMLED 18
 
 esp_mqtt_client_handle_t client;
 bool connected = false;
@@ -54,6 +51,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(TAG, "ESP connected");
         gpio_set_level(OKLED, true);
 
+        esp_mqtt_client_subscribe(client, "/car/lights/normal", 0);
+        esp_mqtt_client_subscribe(client, "/car/lights/long", 0);
+
         break;
     case MQTT_EVENT_DISCONNECTED:
 
@@ -68,10 +68,19 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     case MQTT_EVENT_UNSUBSCRIBED:
         break;
     case MQTT_EVENT_PUBLISHED:
-        ESP_LOGI(TAG, "Got data");
         break;
     case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "Got data");
+        if (strcmp(event->topic, "/car/lights/normal") >= 0)
+        {
+            if(strcmp(event->data, "on") >= 0) gpio_set_level(NORMLED, true);
+            else                          gpio_set_level(NORMLED, false);
+        }
+        else
+        {
+            if(strcmp(event->data, "on") >= 0) gpio_set_level(LONGLED, true);
+            else                          gpio_set_level(LONGLED, false);
+        }
+
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGW(TAG, "MQTT_EVENT_ERROR");
@@ -101,18 +110,20 @@ static void mqtt_app_start(void)
     esp_mqtt_client_start(client);
 }
 
+void configPins()
+{
+    gpio_pad_select_gpio(OKLED);
+    gpio_pad_select_gpio(LONGLED);
+    gpio_pad_select_gpio(NORMLED);
+
+    gpio_set_direction(OKLED, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LONGLED, GPIO_MODE_OUTPUT);
+    gpio_set_direction(NORMLED, GPIO_MODE_OUTPUT);
+}
+
 void app_main(void)
 {
-    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
-
-    xTaskCreate(readAnalog, "ReadAnalog", 1024 * 10, NULL, 10, NULL);
-    xTaskCreate(readDirection, "ReadDirection", 1024 * 10, NULL, 10, NULL);
-    xTaskCreate(readWindow, "ReadWindow", 1024 * 10, NULL, 10, NULL);
-    xTaskCreate(readWiper, "ReadWipers", 1024 * 10, NULL, 10, NULL);
-    xTaskCreate(readLights, "ReadLights", 1024 * 10, NULL, 10, NULL);
-
-    gpio_pad_select_gpio(OKLED);
-    gpio_set_direction(OKLED, GPIO_MODE_OUTPUT);
+    configPins();
 
     esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("MQTT_CLIENT", ESP_LOG_VERBOSE);

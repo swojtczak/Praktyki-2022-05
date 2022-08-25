@@ -95,13 +95,11 @@ void readWiper(void *arg)
     configWipersPins();
 
     char topic[20];
-    char payload[8];
 
     while (true)
     {
         if (xSemaphoreTake(s_wipers_sem, portMAX_DELAY) == pdPASS && connected) 
         {
-            ESP_LOGI(TAG, "ggg");
             gpio_set_level(LEDFB, site);
             gpio_set_level(LEDFLU, fluid);
 
