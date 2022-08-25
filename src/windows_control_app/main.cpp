@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <random>
 
 int moved = 0;
 int val;
@@ -25,10 +26,46 @@ std::array<int, 4> szybyFuture = {0, 0, 0, 0};
 const int QOS                  = 1;
 
 const std::string SERVER_ADDRESS{"tcp://localhost:1883"};
-const std::string CLIENT_ID{"windows_control_app"};
+std::string CLIENT_ID;
 const std::string TOPIC{"/car/window/"};
 
 std::string homeDir;
+
+namespace uuid
+{
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_int_distribution<> dis(0, 15);
+static std::uniform_int_distribution<> dis2(8, 11);
+
+std::string generate_uuid_v4()
+{
+    std::stringstream ss;
+    int i;
+    ss << std::hex;
+    for (i = 0; i < 8; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 4; i++) {
+        ss << dis(gen);
+    }
+    ss << "-4";
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    ss << dis2(gen);
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 12; i++) {
+        ss << dis(gen);
+    };
+    return ss.str();
+}
+} // namespace uuid
 
 void writeOnfile(std::string text)
 {
@@ -89,6 +126,8 @@ void my_handler(int s)
 
 int main()
 {
+    CLIENT_ID = uuid::generate_uuid_v4();
+
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
 
     auto connOpts = mqtt::connect_options_builder().clean_session(true).finalize();
