@@ -93,7 +93,7 @@ for further instructions
 * [Pietrzak04](https://github.com/Pietrzak04)
 * [akinhet](https://github.com/akinhet)
 * [FilipKokowski](https://github.com/FilipKokowski)
-* [ChmieleskiFilip](https://github.com/ChmieleskiFilip)
+* [Kepedoc](https://github.com/Kepedoc)
 
 ### Remaining contributors:
 
